@@ -11,9 +11,9 @@ public class PlanEvent implements Parcelable {
 	private String name;
 	private Date beginDate;
 	private Date endDate;
-	private String location;
+	private GooglePlace location;
 	
-	public PlanEvent (String name, Date bDate, Date eDate, String location) {
+	public PlanEvent (String name, Date bDate, Date eDate, GooglePlace location) {
 		this.name = name;
 		this.beginDate = bDate;
 		this.endDate = eDate;
@@ -24,7 +24,7 @@ public class PlanEvent implements Parcelable {
 		this.name = in.readString();
 		this.beginDate = DateFormater.formatStringToDate(in.readString());
 		this.endDate = DateFormater.formatStringToDate(in.readString());
-		this.location = in.readString();
+		this.location = in.readParcelable(GooglePlace.class.getClassLoader());
 	}
 
 	
@@ -40,7 +40,7 @@ public class PlanEvent implements Parcelable {
 		return endDate;
 	}
 	
-	public String getLocation() {
+	public GooglePlace getLocation() {
 		return location;
 	}
 	
@@ -54,7 +54,7 @@ public class PlanEvent implements Parcelable {
 		dest.writeString(name);
 		dest.writeString(DateFormater.formateDateToString(beginDate));
 		dest.writeString(DateFormater.formateDateToString(endDate));
-		dest.writeString(location);
+		dest.writeParcelable(location, flags);
 	}
 	
 	public static final Parcelable.Creator<PlanEvent> CREATOR

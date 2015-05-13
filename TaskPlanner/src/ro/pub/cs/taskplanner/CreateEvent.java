@@ -5,6 +5,12 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.places.Places;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -13,17 +19,26 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnFocusChangeListener;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-public class CreateEvent extends Activity {
-
+public class CreateEvent extends SimpleBaseActivity 
+	implements GoogleApiClient.OnConnectionFailedListener {
+	/* Place autocomplete variables. */
+	protected GoogleApiClient mGoogleApiClient;
+	 
+	private static final LatLngBounds BOUNDS_GREATER_BUCHAREST = new LatLngBounds(
+            new LatLng(-34.041458, 150.790100), new LatLng(-33.682247, 151.383362));
+	
 	private Button finish;
 	private EditText locationField;
 	private EditText nameField;
@@ -44,6 +59,19 @@ public class CreateEvent extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_create_event);
+		
+		/* Create Google autocomplete. */
+		mGoogleApiClient = new GoogleApiClient.Builder(this)
+				.enableAutoManage(this, 0 /* clientId */, this)
+				.addApi(Places.GEO_DATA_API)
+				.addApi(Places.PLACE_DETECTION_API)
+				.build();
+		
+		AutoCompleteTextView autoCompView = (AutoCompleteTextView) findViewById(R.id.location);
+		
+		ArrayAdapter adapter = new GooglePlacesAutocompleteAdapter(this, R.layout.list_item,
+							mGoogleApiClient, BOUNDS_GREATER_BUCHAREST, null);
+		autoCompView.setAdapter(adapter);
 	}
 
 	@Override
@@ -226,17 +254,21 @@ public class CreateEvent extends Activity {
 				   		 String.valueOf(values[6]) + "/" + 
 				   		 String.valueOf(values[5]) + " " + 
 				   		 String.valueOf(values[8]) + ":" + 
-				   		 String.valueOf(values[9]); 
+				   		 String.valueOf(values[9]);
+		
 		Date beginDate = DateFormater.formatStringToDate(beginDateString);
 		Date endDate = DateFormater.formatStringToDate(endDateString);
-		String location = dates.get(LOCATION_INDEX).getText().toString();
+		String locationText = dates.get(LOCATION_INDEX).getText().toString();
 		String name = dates.get(NAME_INDEX).getText().toString();
 		
-		planEvent = new PlanEvent(name, beginDate, endDate, location);
+		GooglePlace place = new GooglePlace();
+		place.setName(locationText);
+		
+		planEvent = new PlanEvent(name, beginDate, endDate, place);
 	}
 	
 	void populateView() {
-		dates.get(11).setText(parentPlanEvent.getLocation());
+		dates.get(11).setText(parentPlanEvent.getLocation().toString());
 		dates.get(10).setText(parentPlanEvent.getName());
 		Calendar cbegin = Calendar.getInstance();
 		cbegin.setTime(parentPlanEvent.getBeginDate());
@@ -253,5 +285,16 @@ public class CreateEvent extends Activity {
 		dates.get(7).setText(String.valueOf(cend.get(Calendar.DAY_OF_MONTH)));
 		dates.get(8).setText(String.valueOf(cend.get(Calendar.HOUR_OF_DAY)));
 		dates.get(9).setText(String.valueOf(cend.get(Calendar.MINUTE))); 
+	}
+
+	@Override
+	public void onConnectionFailed(ConnectionResult connectionResult) {
+		Log.e(TAG, "onConnectionFailed: ConnectionResult.getErrorCode() = "
+				+ connectionResult.getErrorCode());
+
+		// TODO(Developer): Check error code and notify the user of error state and resolution.
+		Toast.makeText(this,
+				"Could not connect to Google API Client: Error " + connectionResult.getErrorCode(),
+				Toast.LENGTH_SHORT).show();
 	}
 }

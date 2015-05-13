@@ -30,7 +30,6 @@
         android:focusable="false"
         android:focusableInTouchMode="false"
         android:gravity="center"
-        android:elegantTextHeight="true"
         android:ems="10"
         android:text="List of all activities" />
 
