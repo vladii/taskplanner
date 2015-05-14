@@ -21,7 +21,6 @@
         android:gravity="center"
         android:text="Write name here" >
 
-        <requestFocus />
     </EditText>
 
     <CheckBox
@@ -31,27 +30,30 @@
         android:layout_marginBottom="14dp"
         android:text="Do you know the exact location?" />
 
-    <GridLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
-
-        <AutoCompleteTextView
-            android:id="@+id/location"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="fill_horizontal"
-            android:layout_marginBottom="36dp"
-            android:ems="10"
-            android:gravity="center"
-            android:text="Write location here" />
-    </GridLayout>
-
+	<ScrollView
+	   	   	android:layout_width="match_parent"
+	       	android:layout_height="90dp" >
+	       	
+	   	<GridLayout
+	       	android:layout_width="match_parent"
+	       	android:layout_height="wrap_content" >
+	       	<AutoCompleteTextView
+	           	android:id="@+id/location"
+	           	android:layout_width="wrap_content"
+	           	android:layout_height="wrap_content"
+	           	android:layout_gravity="fill_horizontal"
+	           	android:layout_marginBottom="36dp"
+	           	android:ems="10"
+	           	android:gravity="center"
+	           	android:text="Write location here" />
+	   	</GridLayout>
+		</ScrollView>    
     <CheckBox
         android:id="@+id/checkBoxDate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="14dp"
-        android:text="Do you know exact start time?" />
+        android:text="Do you know the exact start time?" />
 
     <GridLayout
         android:layout_width="wrap_content"

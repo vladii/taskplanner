@@ -45,19 +45,21 @@ public class CreateEvent extends SimpleBaseActivity
             new LatLng(-34.041458, 150.790100), new LatLng(-33.682247, 151.383362));
 	
 	private Button finish;
-	private EditText nameField;
 	AutoCompleteTextView autoCompView;
 	private List<EditText> dates;
+	private CheckBox locationCheckbox;
+	private CheckBox dateCheckbox;
 	private PlanEvent planEvent;
 	private PlanEvent parentPlanEvent;	
 	private GooglePlace placeSelected = null;
 	
 	private int parentInt = -1;
 	private int mode;
-	private static final int LISTSIZE = 5;
+	private static final int LISTSIZE = 6;
 	private static final int INTEGERS = 4;
 	private static final int NAME_INDEX = 4;
 	private static final String dateText[] = { "hh", "mm", "hh", "mm", "Write name here", "Write location here"};
+	private static final String DEFAULT_DATE = "1/1/1991 11:11";
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -96,7 +98,7 @@ public class CreateEvent extends SimpleBaseActivity
 		finish = (Button) findViewById(R.id.finishEvent);
 		dates = new ArrayList<EditText>();
 		int ids[] = {R.id.beginHour, R.id.beginMinute, R.id.hoursDuration,
-				R.id.minutesDuration, R.id.eventName};
+				R.id.minutesDuration, R.id.eventName, R.id.location};
 				
 		for (int i = 0; i < LISTSIZE; i ++) {
 			EditText et = (EditText) findViewById(ids[i]);
@@ -106,6 +108,8 @@ public class CreateEvent extends SimpleBaseActivity
 			et.setTypeface(null, Typeface.ITALIC);
 			dates.add(et);
 		}
+		locationCheckbox = (CheckBox) findViewById(R.id.checkBoxLocation);
+		dateCheckbox = (CheckBox) findViewById(R.id.checkBoxDate);
 		
 		Intent intent = getIntent();
 		
@@ -205,7 +209,10 @@ public class CreateEvent extends SimpleBaseActivity
 	boolean verifyConstraints() {
 		int values[] = new int[10];
 		boolean fail = false;
-		
+		if (!dateCheckbox.isChecked()) {
+			createEventObject(values);
+			return true;
+		}
 		try {
 			for (int i = 0; i < INTEGERS; i++) {
 				values[i] = Integer.parseInt(dates.get(i).getText().toString());
@@ -216,9 +223,6 @@ public class CreateEvent extends SimpleBaseActivity
 			}
 			if (values[0] > 24 || values[2] > 24 ||
 				values[1] > 59 || values[3] > 59) {
-				fail = true;
-			}
-			if ("".equals(dates.get(NAME_INDEX).toString())) {
 				fail = true;
 			}
 		} catch (Exception e) {
@@ -242,22 +246,28 @@ public class CreateEvent extends SimpleBaseActivity
 	}
 	
 	void createEventObject(int values[]) {
-		String beginDateString = String.valueOf(1) + "/" +
-						   String.valueOf(1) + "/" + 
-						   String.valueOf(2015) + " " + 
-						   String.valueOf(values[0]) + ":" + 
-						   String.valueOf(values[1]);
-						   
-		String endDateString = String.valueOf(1) + "/" +
+		System.out.println("1");
+		String beginDateString = DEFAULT_DATE;				   
+		String endDateString = DEFAULT_DATE;
+		
+		if (dateCheckbox.isChecked()) {
+			beginDateString = String.valueOf(1) + "/" +
 				   		 String.valueOf(1) + "/" + 
 				   		 String.valueOf(2015) + " " + 
-				   		 String.valueOf(values[2]) + ":" + 
-				   		 String.valueOf(values[3]);
-		
+				   		 String.valueOf(values[0]) + ":" + 
+				   		 String.valueOf(values[1]);
+			
+			endDateString = String.valueOf(1) + "/" +
+					   	 String.valueOf(1) + "/" + 
+					   	 String.valueOf(2015) + " " + 
+					   	 String.valueOf(values[0]) + ":" + 
+					     String.valueOf(values[1]);
+		}
+		System.out.println("2");
 		Date beginDate = DateFormater.formatStringToDate(beginDateString);
 		Date endDate = DateFormater.formatStringToDate(endDateString);
 		String name = dates.get(NAME_INDEX).getText().toString();
-		
+		System.out.println("3");
 		GooglePlace place;
 		
 		if (placeSelected != null) {
@@ -271,22 +281,22 @@ public class CreateEvent extends SimpleBaseActivity
 		planEvent = new PlanEvent(name, beginDate, endDate, place);
 		
 		// Fill exactLocation and exactBeginDate fields.
-		CheckBox locationCheckbox = (CheckBox) findViewById(R.id.checkBoxLocation);
 		if (locationCheckbox.isChecked()) {
 			planEvent.setExactLocation(1);
 		} else {
 			planEvent.setExactLocation(0);
 		}
 		
-		CheckBox dateCheckbox = (CheckBox) findViewById(R.id.checkBoxDate);
 		if (dateCheckbox.isChecked()) {
 			planEvent.setExactBeginDate(1);
 		} else {
 			planEvent.setExactBeginDate(0);
 		}
+		System.out.println(planEvent.toString());
 	}
 	
 	void populateView() {
+		System.out.println(parentPlanEvent.toString());
 		dates.get(NAME_INDEX).setText(parentPlanEvent.getName());
 	
 		Calendar cbegin = Calendar.getInstance();
@@ -295,13 +305,21 @@ public class CreateEvent extends SimpleBaseActivity
 		cend.setTime(parentPlanEvent.getEndDate());
 		
 		placeSelected = parentPlanEvent.getLocation();
-		autoCompView.setText(placeSelected.toString());
-
-		dates.get(0).setText(String.valueOf(cbegin.get(Calendar.HOUR_OF_DAY)));
-		dates.get(1).setText(String.valueOf(cbegin.get(Calendar.MINUTE)));
+		System.out.println(placeSelected.toString() + " location ");
+		try {
+			autoCompView.setText(placeSelected.getAddress().toString());
+		} catch (Exception e) {
+			autoCompView.setText("Write location here");
+		}
+		if (parentPlanEvent.getExactBeginDate() == 1) { 
+			dates.get(0).setText(String.valueOf(cbegin.get(Calendar.HOUR_OF_DAY)));
+			dates.get(1).setText(String.valueOf(cbegin.get(Calendar.MINUTE)));
 		
-		dates.get(2).setText(String.valueOf(cend.get(Calendar.HOUR_OF_DAY)));
-		dates.get(3).setText(String.valueOf(cend.get(Calendar.MINUTE))); 
+			dates.get(2).setText(String.valueOf(cend.get(Calendar.HOUR_OF_DAY)));
+			dates.get(3).setText(String.valueOf(cend.get(Calendar.MINUTE))); 
+		}
+		locationCheckbox.setChecked(parentPlanEvent.getExactLocation() == 1);
+		dateCheckbox.setChecked(parentPlanEvent.getExactBeginDate() == 1);
 	}
 
 	@Override
