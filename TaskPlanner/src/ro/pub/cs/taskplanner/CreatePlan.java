@@ -2,11 +2,16 @@ package ro.pub.cs.taskplanner;
 
 import java.util.*;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.places.Places;
+
 import ro.pub.cs.taskplanner.*;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -16,11 +21,14 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-public class CreatePlan extends Activity {
+public class CreatePlan extends SimpleBaseActivity
+	implements GoogleApiClient.OnConnectionFailedListener {
 	Button finish;
 	Button createEvent;
 	Button scheduleButton;
 	LinearLayout eventsLayout;
+	
+	protected GoogleApiClient mGoogleApiClient;
 
 	static final int EDIT_PLAN_EVENT = 0;
 	static final int NEW_PLAN_EVENT = 1;
@@ -32,7 +40,7 @@ public class CreatePlan extends Activity {
 	private EditText nameText;
 	private static final String INITIAL_NAME = "Write name here";
 	
-	private List<PlanEvent> events;
+	public List<PlanEvent> events;
 	
 	private class EditTextListener implements OnFocusChangeListener  {
 		@Override
@@ -117,6 +125,12 @@ public class CreatePlan extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_create_plan);
+		
+		mGoogleApiClient = new GoogleApiClient.Builder(this)
+					.enableAutoManage(this, 0 /* clientId */, this)
+					.addApi(Places.GEO_DATA_API)
+					.addApi(Places.PLACE_DETECTION_API)
+					.build();
 	
 		createEvent = (Button) findViewById(R.id.newEvent);
 		finish = (Button) findViewById(R.id.finishPlan);
@@ -131,6 +145,10 @@ public class CreatePlan extends Activity {
 		createEvent.setOnClickListener(new ButtonCreateEvent());
 		finish.setOnClickListener(new ButtonFinish());
 		scheduleButton.setOnClickListener(new ButtonSchedule());
+		
+		/* Add the current location in the events list. */
+		GoogleCurrentLocation currLocEvent = new GoogleCurrentLocation(mGoogleApiClient);
+		currLocEvent.setCurrentLocation(this);
 	
 		Intent intent = getIntent();
 		if (intent != null) {
@@ -198,8 +216,13 @@ public class CreatePlan extends Activity {
 	}
 	
 	void populateView() {
-		nameText.setText(parentPlan.getName());
-		events.addAll(parentPlan.getPlansEvents());
+		if (parentPlan != null) {
+			nameText.setText(parentPlan.getName());
+			events.addAll(parentPlan.getPlansEvents());
+		}
+		
+    	eventsLayout.removeAllViews();
+		
 		for (PlanEvent event : events) {
 			addButton(event);
 		}
@@ -213,5 +236,17 @@ public class CreatePlan extends Activity {
 			id = parentPlan.getId();
 		}
 		plan = new Plan(name, id, events);
+	}
+	
+	@Override
+	public void onConnectionFailed(ConnectionResult connectionResult) {
+		Log.e(TAG, "onConnectionFailed: ConnectionResult.getErrorCode() = "
+				+ connectionResult.getErrorCode());
+
+		// TODO(Developer): Check error code and notify the user of error state and resolution.
+		Toast.makeText(this,
+				"Could not connect to Google API Client: Error " + connectionResult.getErrorCode(),
+				Toast.LENGTH_SHORT).show();
+		
 	}
 }
