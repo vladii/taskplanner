@@ -20,7 +20,7 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.Toast;
 
-public class GooglePlacesAutocompleteAdapter extends ArrayAdapter implements Filterable {
+public class GooglePlacesAutocompleteAdapter extends ArrayAdapter<GooglePlace> implements Filterable {
 	public final static String TAG = "TaskPlanner";
 	
 	/**
@@ -151,6 +151,7 @@ public class GooglePlacesAutocompleteAdapter extends ArrayAdapter implements Fil
 
             return resultList;
         }
+        
         Log.e(TAG, "Google API client is not connected for autocomplete query.");
         return null;
     }

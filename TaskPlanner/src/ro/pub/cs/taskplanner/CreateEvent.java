@@ -25,14 +25,19 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnFocusChangeListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.Toast;
 
 public class CreateEvent extends SimpleBaseActivity 
 	implements GoogleApiClient.OnConnectionFailedListener {
+	
 	/* Place autocomplete variables. */
 	protected GoogleApiClient mGoogleApiClient;
 	 
@@ -40,18 +45,18 @@ public class CreateEvent extends SimpleBaseActivity
             new LatLng(-34.041458, 150.790100), new LatLng(-33.682247, 151.383362));
 	
 	private Button finish;
-	private EditText locationField;
 	private EditText nameField;
+	AutoCompleteTextView autoCompView;
 	private List<EditText> dates;
 	private PlanEvent planEvent;
 	private PlanEvent parentPlanEvent;	
+	private GooglePlace placeSelected = null;
 	
 	private int parentInt = -1;
 	private int mode;
-	private static final int LISTSIZE = 6;
+	private static final int LISTSIZE = 5;
 	private static final int INTEGERS = 4;
 	private static final int NAME_INDEX = 4;
-	private static final int LOCATION_INDEX = 5;
 	private static final String dateText[] = { "hh", "mm", "hh", "mm", "Write name here", "Write location here"};
 	
 	@Override
@@ -66,11 +71,21 @@ public class CreateEvent extends SimpleBaseActivity
 				.addApi(Places.PLACE_DETECTION_API)
 				.build();
 		
-		AutoCompleteTextView autoCompView = (AutoCompleteTextView) findViewById(R.id.location);
+		autoCompView = (AutoCompleteTextView) findViewById(R.id.location);
 		
-		ArrayAdapter adapter = new GooglePlacesAutocompleteAdapter(this, R.layout.list_item,
-							mGoogleApiClient, BOUNDS_GREATER_BUCHAREST, null);
+		ArrayAdapter<GooglePlace> adapter =
+					new GooglePlacesAutocompleteAdapter(this, R.layout.list_item,
+					mGoogleApiClient, BOUNDS_GREATER_BUCHAREST, null);
+		
 		autoCompView.setAdapter(adapter);
+		
+		autoCompView.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				placeSelected = (GooglePlace) parent.getItemAtPosition(position);
+			}
+		});
 	}
 
 	@Override
@@ -81,7 +96,7 @@ public class CreateEvent extends SimpleBaseActivity
 		finish = (Button) findViewById(R.id.finishEvent);
 		dates = new ArrayList<EditText>();
 		int ids[] = {R.id.beginHour, R.id.beginMinute, R.id.hoursDuration,
-				R.id.minutesDuration, R.id.eventName, R.id.location};
+				R.id.minutesDuration, R.id.eventName};
 				
 		for (int i = 0; i < LISTSIZE; i ++) {
 			EditText et = (EditText) findViewById(ids[i]);
@@ -91,10 +106,10 @@ public class CreateEvent extends SimpleBaseActivity
 			et.setTypeface(null, Typeface.ITALIC);
 			dates.add(et);
 		}
+		
 		Intent intent = getIntent();
 		
 		if (intent != null) {
-			
 			mode = intent.getIntExtra("MODE", -1);
 			if (mode == 1) {
 				parentInt = intent.getIntExtra("EDIT_EVENT_INDEX", -1);
@@ -203,7 +218,7 @@ public class CreateEvent extends SimpleBaseActivity
 				values[1] > 59 || values[3] > 59) {
 				fail = true;
 			}
-			if ("".equals(dates.get(NAME_INDEX).toString()) || "".equals(dates.get(LOCATION_INDEX).toString())) {
+			if ("".equals(dates.get(NAME_INDEX).toString())) {
 				fail = true;
 			}
 		} catch (Exception e) {
@@ -241,23 +256,46 @@ public class CreateEvent extends SimpleBaseActivity
 		
 		Date beginDate = DateFormater.formatStringToDate(beginDateString);
 		Date endDate = DateFormater.formatStringToDate(endDateString);
-		String locationText = dates.get(LOCATION_INDEX).getText().toString();
 		String name = dates.get(NAME_INDEX).getText().toString();
 		
-		GooglePlace place = new GooglePlace();
-		place.setName(locationText);
+		GooglePlace place;
 		
+		if (placeSelected != null) {
+			place = placeSelected;
+		} else {
+			place = new GooglePlace();
+			place.setName(autoCompView.getText().toString());
+		}
+		
+		// Create new event.
 		planEvent = new PlanEvent(name, beginDate, endDate, place);
+		
+		// Fill exactLocation and exactBeginDate fields.
+		CheckBox locationCheckbox = (CheckBox) findViewById(R.id.checkBoxLocation);
+		if (locationCheckbox.isChecked()) {
+			planEvent.setExactLocation(1);
+		} else {
+			planEvent.setExactLocation(0);
+		}
+		
+		CheckBox dateCheckbox = (CheckBox) findViewById(R.id.checkBoxDate);
+		if (dateCheckbox.isChecked()) {
+			planEvent.setExactBeginDate(1);
+		} else {
+			planEvent.setExactBeginDate(0);
+		}
 	}
 	
 	void populateView() {
-		dates.get(LOCATION_INDEX).setText(parentPlanEvent.getLocation().toString());
 		dates.get(NAME_INDEX).setText(parentPlanEvent.getName());
 	
 		Calendar cbegin = Calendar.getInstance();
 		cbegin.setTime(parentPlanEvent.getBeginDate());
 		Calendar cend = Calendar.getInstance();
 		cend.setTime(parentPlanEvent.getEndDate());
+		
+		placeSelected = parentPlanEvent.getLocation();
+		autoCompView.setText(placeSelected.toString());
 
 		dates.get(0).setText(String.valueOf(cbegin.get(Calendar.HOUR_OF_DAY)));
 		dates.get(1).setText(String.valueOf(cbegin.get(Calendar.MINUTE)));

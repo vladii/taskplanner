@@ -1,10 +1,12 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginLeft="20dp"
+    android:layout_marginLeft="1dp"
+    android:baselineAligned="false"
     android:descendantFocusability="beforeDescendants"
     android:focusableInTouchMode="true"
+    android:orientation="vertical"
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
@@ -15,123 +17,110 @@
         android:id="@+id/eventName"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="25dp"
         android:ems="10"
         android:gravity="center"
-        android:text="Write name here" />
+        android:text="Write name here" >
+
+        <requestFocus />
+    </EditText>
+
+    <CheckBox
+        android:id="@+id/checkBoxLocation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="14dp"
+        android:text="Do you know the exact location?" />
+
+    <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <AutoCompleteTextView
+            android:id="@+id/location"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="fill_horizontal"
+            android:layout_marginBottom="36dp"
+            android:ems="10"
+            android:gravity="center"
+            android:text="Write location here" />
+    </GridLayout>
+
+    <CheckBox
+        android:id="@+id/checkBoxDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="14dp"
+        android:text="Do you know exact start time?" />
+
+    <GridLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:columnCount="3"
+        android:rowCount="2" >
+
+        <EditText
+            android:id="@+id/beginDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="fill_horizontal"
+            android:clickable="false"
+            android:editable="false"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:text="Beginning date" />
+
+        <EditText
+            android:id="@+id/beginHour"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="fill_horizontal"
+            android:gravity="center" />
+
+        <EditText
+            android:id="@+id/beginMinute"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="fill_horizontal"
+            android:gravity="center" />
+
+        <EditText
+            android:id="@+id/duration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="fill_horizontal"
+            android:layout_marginBottom="20dp"
+            android:clickable="false"
+            android:editable="false"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:text="Duration" />
+
+        <EditText
+            android:id="@+id/hoursDuration"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="fill_horizontal"
+            android:ems="10"
+            android:gravity="center" />
+
+        <EditText
+            android:id="@+id/minutesDuration"
+            android:layout_width="54dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="fill_horizontal"
+            android:ems="10"
+            android:gravity="center" />
+
+    </GridLayout>
 
     <Button
         android:id="@+id/finishEvent"
-        android:layout_width="wrap_content"
+        android:layout_width="137dp"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="25dp"
-        android:text="Finish" />
-
-    <EditText
-        android:id="@+id/beginMinute"
-        android:layout_width="50dp"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/beginHour"
-        android:layout_alignBottom="@+id/beginHour"
-        android:layout_alignRight="@+id/location"
-        android:ems="10"
-        android:gravity="center" />
-
-    <EditText
-        android:id="@+id/beginHour"
-        android:layout_width="50dp"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/beginDate"
-        android:layout_alignBottom="@+id/beginDate"
-        android:layout_toRightOf="@+id/beginDate"
-        android:ems="10"
-        android:gravity="center" />
-
-    <EditText
-        android:id="@+id/duration"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/finishEvent"
-        android:layout_alignRight="@+id/finishEvent"
-        android:layout_marginBottom="22dp"
-        android:clickable="false"
-        android:editable="false"
-        android:ems="10"
-        android:focusable="false"
-        android:focusableInTouchMode="false"
+        android:layout_marginBottom="42dp"
+        android:layout_marginRight="59dp"
         android:gravity="center"
-        android:text="Duration" />
+        android:text="Add event" />
 
-    <EditText
-        android:id="@+id/hoursDuration"
-        android:layout_width="50dp"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/duration"
-        android:layout_alignBottom="@+id/duration"
-        android:layout_alignLeft="@+id/beginHour"
-        android:ems="10"
-        android:gravity="center" >
-
-    </EditText>
-
-    <EditText
-        android:id="@+id/minutesDuration"
-        android:layout_width="50dp"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/hoursDuration"
-        android:layout_alignBottom="@+id/hoursDuration"
-        android:layout_toRightOf="@+id/hoursDuration"
-        android:ems="10"
-        android:gravity="center" />
-
-    <EditText
-        android:id="@+id/beginDate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/duration"
-        android:layout_alignLeft="@+id/duration"
-        android:layout_alignRight="@+id/duration"
-        android:layout_marginBottom="17dp"
-        android:clickable="false"
-        android:editable="false"
-        android:ems="10"
-        android:focusable="false"
-        android:focusableInTouchMode="false"
-        android:gravity="center"
-        android:text="Beginning date" />
-
-    <CheckBox
-        android:id="@+id/checkBox1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/beginDate"
-        android:layout_centerVertical="true"
-        android:text="Select start time and duration" />
-
-    <AutoCompleteTextView
-        android:id="@+id/location"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/checkBox1"
-        android:layout_alignLeft="@+id/checkBox1"
-        android:layout_alignRight="@+id/eventName"
-        android:layout_marginBottom="23dp"
-        android:ems="10"
-        android:gravity="center"
-        android:text="Write location here" />
-
-    <CheckBox
-        android:id="@+id/checkBox2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/location"
-        android:layout_alignLeft="@+id/location"
-        android:layout_alignRight="@+id/location"
-        android:layout_marginBottom="20dp"
-        android:text="Select specific location" />
-
-</RelativeLayout>
+</LinearLayout>

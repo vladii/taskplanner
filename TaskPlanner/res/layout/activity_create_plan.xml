@@ -39,16 +39,6 @@
         </LinearLayout>
     </ScrollView>
 
-    <Button
-        android:id="@+id/finishPlan"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/newEvent"
-        android:layout_alignParentBottom="true"
-        android:layout_alignRight="@+id/newEvent"
-        android:layout_marginBottom="50dp"
-        android:text="Finish" />
-
     <EditText
         android:id="@+id/planName"
         android:layout_width="wrap_content"
@@ -59,5 +49,25 @@
         android:ems="10"
         android:gravity="center"
         android:text="Write name here" />
+
+    <Button
+        android:id="@+id/finishPlan"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="68dp"
+        android:layout_marginRight="23dp"
+        android:text="Back" />
+
+    <Button
+        android:id="@+id/scheduleButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/finishPlan"
+        android:layout_alignBottom="@+id/finishPlan"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="30dp"
+        android:text="Schedule" />
 
 </RelativeLayout>

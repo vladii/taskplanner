@@ -19,6 +19,7 @@ import android.widget.Toast;
 public class CreatePlan extends Activity {
 	Button finish;
 	Button createEvent;
+	Button scheduleButton;
 	LinearLayout eventsLayout;
 
 	static final int EDIT_PLAN_EVENT = 0;
@@ -51,6 +52,14 @@ public class CreatePlan extends Activity {
 		}
 	}
 
+	private class ButtonSchedule implements Button.OnClickListener {
+
+		@Override
+		public void onClick(View v) {
+			System.out.println(events);
+		}
+		
+	}
 	
 	private class ButtonFinish implements Button.OnClickListener {
 		@Override
@@ -111,7 +120,9 @@ public class CreatePlan extends Activity {
 	
 		createEvent = (Button) findViewById(R.id.newEvent);
 		finish = (Button) findViewById(R.id.finishPlan);
+		scheduleButton = (Button) findViewById(R.id.scheduleButton);
 		eventsLayout = (LinearLayout) findViewById(R.id.eventsLayout);
+		
 		events = new ArrayList<PlanEvent>();
 		nameText = (EditText) findViewById(R.id.planName);
 		nameText.setText(INITIAL_NAME);
@@ -119,6 +130,7 @@ public class CreatePlan extends Activity {
 		
 		createEvent.setOnClickListener(new ButtonCreateEvent());
 		finish.setOnClickListener(new ButtonFinish());
+		scheduleButton.setOnClickListener(new ButtonSchedule());
 	
 		Intent intent = getIntent();
 		if (intent != null) {

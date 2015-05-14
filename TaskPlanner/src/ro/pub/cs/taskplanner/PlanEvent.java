@@ -11,6 +11,8 @@ public class PlanEvent implements Parcelable {
 	private String name;
 	private Date beginDate;
 	private Date endDate;
+	private Integer exactLocation;
+	private Integer exactBeginDate;
 	private GooglePlace location;
 	
 	public PlanEvent (String name, Date bDate, Date eDate, GooglePlace location) {
@@ -18,15 +20,35 @@ public class PlanEvent implements Parcelable {
 		this.beginDate = bDate;
 		this.endDate = eDate;
 		this.location = location;
+		
+		this.exactLocation = 1;
+		this.exactBeginDate = 1;
 	}
 	
 	private PlanEvent (Parcel in) {
 		this.name = in.readString();
 		this.beginDate = DateFormater.formatStringToDate(in.readString());
 		this.endDate = DateFormater.formatStringToDate(in.readString());
+		this.exactLocation = in.readInt();
+		this.exactBeginDate = in.readInt();
 		this.location = in.readParcelable(GooglePlace.class.getClassLoader());
 	}
 
+	public Integer getExactLocation() {
+		return this.exactLocation;
+	}
+	
+	public void setExactLocation(Integer exactLocation) {
+		this.exactLocation = exactLocation;
+	}
+	
+	public Integer getExactBeginDate() {
+		return this.exactBeginDate;
+	}
+	
+	public void setExactBeginDate(Integer exactBeginDate) {
+		this.exactBeginDate = exactBeginDate;
+	}
 	
 	public String getName() {
 		return name;
@@ -54,6 +76,8 @@ public class PlanEvent implements Parcelable {
 		dest.writeString(name);
 		dest.writeString(DateFormater.formateDateToString(beginDate));
 		dest.writeString(DateFormater.formateDateToString(endDate));
+		dest.writeInt(exactLocation);
+		dest.writeInt(exactBeginDate);
 		dest.writeParcelable(location, flags);
 	}
 	
@@ -69,7 +93,27 @@ public class PlanEvent implements Parcelable {
 	};
 	
 	public String toString() {
-		return "printing event : " + name + "\n" + beginDate.toString() 
-				+ "\n" + endDate.toString() + "\n" + location.toString();
+		String ret = "";
+		
+		if (name != null) {
+			ret += "Name: " + name;
+		}
+		
+		ret += ", Exact location: " + exactLocation;
+		ret += ", Exact begin date: " + exactBeginDate;
+		
+		if (beginDate != null) {
+			ret += ", Begin date: " + beginDate;
+		}
+		
+		if (endDate != null) {
+			ret += ", End date: " + endDate;
+		}
+		
+		if (location != null) {
+			ret += ", Location: " + location;
+		}
+		
+		return ret;
 	}
 }
