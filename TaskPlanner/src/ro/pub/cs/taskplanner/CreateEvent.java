@@ -48,12 +48,11 @@ public class CreateEvent extends SimpleBaseActivity
 	
 	private int parentInt = -1;
 	private int mode;
-	private int ids[];
-	private static final int LISTSIZE = 12;
-	private static final int NAME_INDEX = 10;
-	private static final int LOCATION_INDEX = 11;
-	private static final String dateText[] = {"yyyy", "mm", "dd", "hh", "mm", 
-		"yyyy", "mm", "dd", "hh", "mm", "Write name here", "Write location here"};
+	private static final int LISTSIZE = 6;
+	private static final int INTEGERS = 4;
+	private static final int NAME_INDEX = 4;
+	private static final int LOCATION_INDEX = 5;
+	private static final String dateText[] = { "hh", "mm", "hh", "mm", "Write name here", "Write location here"};
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -81,23 +80,9 @@ public class CreateEvent extends SimpleBaseActivity
 		
 		finish = (Button) findViewById(R.id.finishEvent);
 		dates = new ArrayList<EditText>();
-		ids = new int[LISTSIZE];
-		
-		ids[0] = R.id.beginYear;
-		ids[1] = R.id.beginMonth;
-		ids[2] = R.id.beginDay;
-		ids[3] = R.id.beginHour;
-		ids[4] = R.id.beginMinute;
-
-		ids[5] = R.id.endYear;
-		ids[6] = R.id.endMonth;
-		ids[7] = R.id.endDay;
-		ids[8] = R.id.endHour;
-		ids[9] = R.id.endMinute;
-		
-		ids[10] = R.id.eventName;
-		ids[11] = R.id.location;
-		
+		int ids[] = {R.id.beginHour, R.id.beginMinute, R.id.hoursDuration,
+				R.id.minutesDuration, R.id.eventName, R.id.location};
+				
 		for (int i = 0; i < LISTSIZE; i ++) {
 			EditText et = (EditText) findViewById(ids[i]);
 			et.setText(dateText[i]);
@@ -195,7 +180,7 @@ public class CreateEvent extends SimpleBaseActivity
 	
 	private int findId(int id) {
 		for (int i = 0; i < LISTSIZE; i++) {
-			if (ids[i] == id) {
+			if (dates.get(i).getId() == id) {
 				return i;
 			}
 		}
@@ -207,20 +192,18 @@ public class CreateEvent extends SimpleBaseActivity
 		boolean fail = false;
 		
 		try {
-			for (int i = 0; i < 10; i++) {
+			for (int i = 0; i < INTEGERS; i++) {
 				values[i] = Integer.parseInt(dates.get(i).getText().toString());
 				if (values[i] < 0) { 
 					fail = true;
 				}
 				
 			}
-			if (values[1] > 12 || values[6] > 12 || 
-				values[2] > 31 || values[6] > 31 ||
-				values[3] > 24 || values[8] > 24 ||
-				values[4] > 59 || values[9] > 59) {
+			if (values[0] > 24 || values[2] > 24 ||
+				values[1] > 59 || values[3] > 59) {
 				fail = true;
 			}
-			if ("".equals(dates.get(10).toString()) || "".equals(dates.get(11).toString())) {
+			if ("".equals(dates.get(NAME_INDEX).toString()) || "".equals(dates.get(LOCATION_INDEX).toString())) {
 				fail = true;
 			}
 		} catch (Exception e) {
@@ -244,17 +227,17 @@ public class CreateEvent extends SimpleBaseActivity
 	}
 	
 	void createEventObject(int values[]) {
-		String beginDateString = String.valueOf(values[2]) + "/" +
-						   String.valueOf(values[1]) + "/" + 
-						   String.valueOf(values[0]) + " " + 
-						   String.valueOf(values[3]) + ":" + 
-						   String.valueOf(values[4]);
+		String beginDateString = String.valueOf(1) + "/" +
+						   String.valueOf(1) + "/" + 
+						   String.valueOf(2015) + " " + 
+						   String.valueOf(values[0]) + ":" + 
+						   String.valueOf(values[1]);
 						   
-		String endDateString = String.valueOf(values[7]) + "/" +
-				   		 String.valueOf(values[6]) + "/" + 
-				   		 String.valueOf(values[5]) + " " + 
-				   		 String.valueOf(values[8]) + ":" + 
-				   		 String.valueOf(values[9]);
+		String endDateString = String.valueOf(1) + "/" +
+				   		 String.valueOf(1) + "/" + 
+				   		 String.valueOf(2015) + " " + 
+				   		 String.valueOf(values[2]) + ":" + 
+				   		 String.valueOf(values[3]);
 		
 		Date beginDate = DateFormater.formatStringToDate(beginDateString);
 		Date endDate = DateFormater.formatStringToDate(endDateString);
@@ -268,23 +251,19 @@ public class CreateEvent extends SimpleBaseActivity
 	}
 	
 	void populateView() {
-		dates.get(11).setText(parentPlanEvent.getLocation().toString());
-		dates.get(10).setText(parentPlanEvent.getName());
+		dates.get(LOCATION_INDEX).setText(parentPlanEvent.getLocation().toString());
+		dates.get(NAME_INDEX).setText(parentPlanEvent.getName());
+	
 		Calendar cbegin = Calendar.getInstance();
 		cbegin.setTime(parentPlanEvent.getBeginDate());
 		Calendar cend = Calendar.getInstance();
 		cend.setTime(parentPlanEvent.getEndDate());
-		dates.get(0).setText(String.valueOf(cbegin.get(Calendar.YEAR)));
-		dates.get(1).setText(String.valueOf(cbegin.get(Calendar.MONTH) + 1));
-		dates.get(2).setText(String.valueOf(cbegin.get(Calendar.DAY_OF_MONTH)));
-		dates.get(3).setText(String.valueOf(cbegin.get(Calendar.HOUR_OF_DAY)));
-		dates.get(4).setText(String.valueOf(cbegin.get(Calendar.MINUTE)));
+
+		dates.get(0).setText(String.valueOf(cbegin.get(Calendar.HOUR_OF_DAY)));
+		dates.get(1).setText(String.valueOf(cbegin.get(Calendar.MINUTE)));
 		
-		dates.get(5).setText(String.valueOf(cend.get(Calendar.YEAR)));
-		dates.get(6).setText(String.valueOf(cend.get(Calendar.MONTH) + 1));
-		dates.get(7).setText(String.valueOf(cend.get(Calendar.DAY_OF_MONTH)));
-		dates.get(8).setText(String.valueOf(cend.get(Calendar.HOUR_OF_DAY)));
-		dates.get(9).setText(String.valueOf(cend.get(Calendar.MINUTE))); 
+		dates.get(2).setText(String.valueOf(cend.get(Calendar.HOUR_OF_DAY)));
+		dates.get(3).setText(String.valueOf(cend.get(Calendar.MINUTE))); 
 	}
 
 	@Override

@@ -121,6 +121,6 @@ public class GooglePlace implements Parcelable {
 		public GooglePlace[] newArray(int size) {
 			return new GooglePlace[size];
 		}
-};
+	};
 }
 

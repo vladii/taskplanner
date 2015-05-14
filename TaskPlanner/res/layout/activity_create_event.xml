@@ -3,25 +3,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_marginLeft="20dp"
+    android:descendantFocusability="beforeDescendants"
+    android:focusableInTouchMode="true"
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    android:descendantFocusability="beforeDescendants"
-	android:focusableInTouchMode="true" >
     tools:context="ro.pub.cs.taskplanner.CreateEvent" >
-
-    <AutoCompleteTextView
-        android:id="@+id/location"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/eventName"
-        android:layout_alignRight="@+id/eventName"
-        android:layout_below="@+id/eventName"
-        android:layout_marginTop="17dp"
-        android:ems="10"
-        android:gravity="center"
-        android:text="Write location here" />
 
     <EditText
         android:id="@+id/eventName"
@@ -34,22 +22,6 @@
         android:gravity="center"
         android:text="Write name here" />
 
-    <EditText
-        android:id="@+id/beginDate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/location"
-        android:layout_alignRight="@+id/location"
-        android:layout_below="@+id/location"
-        android:layout_marginTop="21dp"
-        android:ems="10"
-        android:clickable="false"
-        android:editable="false"
-        android:focusable="false"
-        android:focusableInTouchMode="false"
-        android:gravity="center"
-        android:text="Beginning date" />
-
     <Button
         android:id="@+id/finishEvent"
         android:layout_width="wrap_content"
@@ -60,120 +32,106 @@
         android:text="Finish" />
 
     <EditText
-        android:id="@+id/endingDate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/beginDate"
-        android:layout_alignRight="@+id/beginDate"
-        android:layout_below="@+id/beginDate"
-        android:layout_marginTop="62dp"
-        android:ems="10"
-        android:clickable="false"
-        android:editable="false"
-        android:focusable="false"
-        android:focusableInTouchMode="false"
-        android:gravity="center"
-        android:text="Ending date" />
-
-    <EditText
-        android:id="@+id/beginYear"
-        android:layout_width="65dp"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/beginDate"
-        android:layout_below="@+id/beginDate"
-        android:gravity="center"
-        android:ems="10" />
-
-    <EditText
-        android:id="@+id/beginMonth"
-        android:layout_width="50dp"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/beginYear"
-        android:layout_alignBottom="@+id/beginYear"
-        android:layout_toRightOf="@+id/beginYear"
-        android:gravity="center"
-        android:ems="10" >
-    </EditText>
-
-    <EditText
-        android:id="@+id/beginDay"
-        android:layout_width="50dp"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/beginMonth"
-        android:layout_alignBottom="@+id/beginMonth"
-        android:layout_toRightOf="@+id/beginMonth"
-        android:gravity="center"
-        android:ems="10" />
-
-    <EditText
-        android:id="@+id/beginHour"
-        android:layout_width="50dp"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/beginDay"
-        android:layout_alignBottom="@+id/beginDay"
-        android:layout_toRightOf="@+id/beginDay"
-        android:gravity="center"
-        android:ems="10" />
-
-    <EditText
         android:id="@+id/beginMinute"
         android:layout_width="50dp"
         android:layout_height="wrap_content"
         android:layout_alignBaseline="@+id/beginHour"
         android:layout_alignBottom="@+id/beginHour"
-        android:layout_alignRight="@+id/beginDate"
-        android:gravity="center"
-        android:ems="10" />
+        android:layout_alignRight="@+id/location"
+        android:ems="10"
+        android:gravity="center" />
 
     <EditText
-        android:id="@+id/endYear"
-        android:layout_width="65dp"
+        android:id="@+id/beginHour"
+        android:layout_width="50dp"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/endingDate"
-        android:layout_below="@+id/endingDate"
-        android:layout_toLeftOf="@+id/beginMonth"
-        android:gravity="center"
-        android:ems="10" />
+        android:layout_alignBaseline="@+id/beginDate"
+        android:layout_alignBottom="@+id/beginDate"
+        android:layout_toRightOf="@+id/beginDate"
+        android:ems="10"
+        android:gravity="center" />
 
     <EditText
-        android:id="@+id/endMonth"
-        android:layout_width="50dp"
+        android:id="@+id/duration"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/endYear"
-        android:layout_alignBottom="@+id/endYear"
-        android:layout_toRightOf="@+id/endYear"
+        android:layout_above="@+id/finishEvent"
+        android:layout_alignRight="@+id/finishEvent"
+        android:layout_marginBottom="22dp"
+        android:clickable="false"
+        android:editable="false"
+        android:ems="10"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
         android:gravity="center"
-        android:ems="10" />
+        android:text="Duration" />
 
     <EditText
-        android:id="@+id/endDay"
+        android:id="@+id/hoursDuration"
         android:layout_width="50dp"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/endYear"
-        android:layout_alignBottom="@+id/endYear"
-        android:layout_toRightOf="@+id/endMonth"
-        android:gravity="center"
-        android:ems="10" />
-    
-        <EditText
-        android:id="@+id/endHour"
+        android:layout_alignBaseline="@+id/duration"
+        android:layout_alignBottom="@+id/duration"
+        android:layout_alignLeft="@+id/beginHour"
+        android:ems="10"
+        android:gravity="center" >
+
+    </EditText>
+
+    <EditText
+        android:id="@+id/minutesDuration"
         android:layout_width="50dp"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/endYear"
-        android:layout_alignBottom="@+id/endYear"
-        android:layout_toRightOf="@+id/endDay"
-        android:gravity="center"
-        android:ems="10" />
-        
-        <EditText
-        android:id="@+id/endMinute"
-		android:layout_width="50dp"
+        android:layout_alignBaseline="@+id/hoursDuration"
+        android:layout_alignBottom="@+id/hoursDuration"
+        android:layout_toRightOf="@+id/hoursDuration"
+        android:ems="10"
+        android:gravity="center" />
+
+    <EditText
+        android:id="@+id/beginDate"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/endYear"
-        android:layout_alignBottom="@+id/endYear"
-        android:layout_alignRight="@+id/endingDate"
-        android:layout_toRightOf="@+id/endHour"
+        android:layout_above="@+id/duration"
+        android:layout_alignLeft="@+id/duration"
+        android:layout_alignRight="@+id/duration"
+        android:layout_marginBottom="17dp"
+        android:clickable="false"
+        android:editable="false"
+        android:ems="10"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
         android:gravity="center"
-        android:ems="10" />
+        android:text="Beginning date" />
+
+    <CheckBox
+        android:id="@+id/checkBox1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/beginDate"
+        android:layout_centerVertical="true"
+        android:text="Select start time and duration" />
+
+    <AutoCompleteTextView
+        android:id="@+id/location"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/checkBox1"
+        android:layout_alignLeft="@+id/checkBox1"
+        android:layout_alignRight="@+id/eventName"
+        android:layout_marginBottom="23dp"
+        android:ems="10"
+        android:gravity="center"
+        android:text="Write location here" />
+
+    <CheckBox
+        android:id="@+id/checkBox2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/location"
+        android:layout_alignLeft="@+id/location"
+        android:layout_alignRight="@+id/location"
+        android:layout_marginBottom="20dp"
+        android:text="Select specific location" />
 
 </RelativeLayout>

@@ -69,6 +69,7 @@ public class PlanEvent implements Parcelable {
 	};
 	
 	public String toString() {
-		return "printing event : " + name + "\n" + beginDate.toString() + "\n" + endDate.toString() + "\n" + location;
+		return "printing event : " + name + "\n" + beginDate.toString() 
+				+ "\n" + endDate.toString() + "\n" + location.toString();
 	}
 }
