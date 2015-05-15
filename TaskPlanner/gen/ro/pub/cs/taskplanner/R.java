@@ -489,8 +489,9 @@ containing a value of this type.
         public static final int powered_by_google_light=0x7f020020;
     }
     public static final class id {
-        public static final int action_settings=0x7f0c002d;
-        public static final int activities_label=0x7f0c002a;
+        public static final int TextView01=0x7f0c0023;
+        public static final int action_settings=0x7f0c0030;
+        public static final int activities_label=0x7f0c002d;
         public static final int adjust_height=0x7f0c0000;
         public static final int adjust_width=0x7f0c0001;
         public static final int beginDate=0x7f0c001c;
@@ -503,37 +504,39 @@ containing a value of this type.
         public static final int checkBoxDate=0x7f0c001b;
         public static final int checkBoxLocation=0x7f0c0019;
         public static final int classic=0x7f0c0014;
-        public static final int create_new_plan_button=0x7f0c0029;
+        public static final int create_new_plan_button=0x7f0c002c;
         public static final int donate_with_google=0x7f0c0013;
         public static final int duration=0x7f0c001f;
         public static final int eventName=0x7f0c0018;
-        public static final int eventsLayout=0x7f0c0027;
-        public static final int finishEvent=0x7f0c0022;
-        public static final int finishPlan=0x7f0c0026;
+        public static final int eventsLayout=0x7f0c002a;
+        public static final int finishEvent=0x7f0c0024;
+        public static final int finishPlan=0x7f0c0029;
         public static final int grayscale=0x7f0c0015;
         public static final int holo_dark=0x7f0c0007;
         public static final int holo_light=0x7f0c0008;
         public static final int hoursDuration=0x7f0c0020;
         public static final int hybrid=0x7f0c0003;
-        public static final int linearLayout=0x7f0c002c;
+        public static final int linearLayout=0x7f0c002f;
         public static final int location=0x7f0c001a;
         public static final int match_parent=0x7f0c000e;
         public static final int minutesDuration=0x7f0c0021;
         public static final int monochrome=0x7f0c0016;
-        public static final int newEvent=0x7f0c0023;
+        public static final int newEvent=0x7f0c0026;
         public static final int none=0x7f0c0002;
         public static final int normal=0x7f0c0004;
-        public static final int planName=0x7f0c0024;
+        public static final int planName=0x7f0c0027;
         public static final int production=0x7f0c0009;
+        public static final int removeEvent=0x7f0c0025;
         public static final int sandbox=0x7f0c000a;
         public static final int satellite=0x7f0c0005;
-        public static final int scheduleButton=0x7f0c0028;
-        public static final int scrollView=0x7f0c002b;
-        public static final int scrollView1=0x7f0c0025;
+        public static final int scheduleButton=0x7f0c002b;
+        public static final int scrollView=0x7f0c002e;
+        public static final int scrollView1=0x7f0c0028;
         public static final int selectionDetails=0x7f0c000d;
         public static final int slide=0x7f0c0017;
         public static final int strict_sandbox=0x7f0c000b;
         public static final int terrain=0x7f0c0006;
+        public static final int textView1=0x7f0c0022;
         public static final int wrap_content=0x7f0c000f;
     }
     public static final class integer {

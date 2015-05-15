@@ -81,9 +81,8 @@ public class GoogleCurrentLocation extends SimpleBaseActivity
 			Log.d(TAG, "Added current location!");
 			
 			plan.events.add(event);
-			plan.populateView();
+			plan.addView(event);
 		}
-		
 	}
 	
 	public void setCurrentLocation(CreatePlan plan) {

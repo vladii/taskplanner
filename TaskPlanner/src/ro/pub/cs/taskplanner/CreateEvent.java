@@ -44,8 +44,9 @@ public class CreateEvent extends SimpleBaseActivity
 	private static final LatLngBounds BOUNDS_GREATER_BUCHAREST = new LatLngBounds(
             new LatLng(-34.041458, 150.790100), new LatLng(-33.682247, 151.383362));
 	
-	private Button finish;
 	AutoCompleteTextView autoCompView;
+	private Button finish;
+	private Button remove;
 	private List<EditText> dates;
 	private CheckBox locationCheckbox;
 	private CheckBox dateCheckbox;
@@ -55,6 +56,8 @@ public class CreateEvent extends SimpleBaseActivity
 	
 	private int parentInt = -1;
 	private int mode;
+	private boolean removeEvent;
+	
 	private static final int LISTSIZE = 6;
 	private static final int INTEGERS = 4;
 	private static final int NAME_INDEX = 4;
@@ -96,6 +99,10 @@ public class CreateEvent extends SimpleBaseActivity
 		getMenuInflater().inflate(R.menu.create_event, menu);
 		
 		finish = (Button) findViewById(R.id.finishEvent);
+		remove = (Button) findViewById(R.id.removeEvent);
+		finish.setOnClickListener(new ButtonFinish());
+		remove.setOnClickListener(new ButtonFinish());
+		
 		dates = new ArrayList<EditText>();
 		int ids[] = {R.id.beginHour, R.id.beginMinute, R.id.hoursDuration,
 				R.id.minutesDuration, R.id.eventName, R.id.location};
@@ -116,13 +123,12 @@ public class CreateEvent extends SimpleBaseActivity
 		if (intent != null) {
 			mode = intent.getIntExtra("MODE", -1);
 			if (mode == 1) {
+				remove.setText("Remove event");
 				parentInt = intent.getIntExtra("EDIT_EVENT_INDEX", -1);
 				parentPlanEvent = (PlanEvent) intent.getParcelableExtra("EDIT_EVENT");
 				populateView();
 			}
 		} 
-		
-		finish.setOnClickListener(new ButtonFinish());
 			
 		return true;
 	}
@@ -143,6 +149,10 @@ public class CreateEvent extends SimpleBaseActivity
 		@Override
 		public void onClick(View v) {
 			int result = 1;
+			if (v.getId() == remove.getId()) {
+				removeAlertDialog();
+				return;
+			}
 			if (verifyConstraints()) {
 				Intent resultIntent = new Intent();
 				if (mode == 1) {
@@ -162,6 +172,26 @@ public class CreateEvent extends SimpleBaseActivity
 				finish();
 			}
 		}
+	}
+	
+	void removeAlertDialog() {
+		new AlertDialog.Builder(this)
+		.setTitle("Remove event")
+		.setMessage("Are you sure you want to remove the event ?")
+		.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int which) { 
+				Intent resultIntent = new Intent();
+				resultIntent.putExtra("EDIT_EVENT_INDEX", parentInt);
+				setResult(2, resultIntent); // remove event
+				finish();
+			}
+		})
+		.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int which) { 
+			}
+		})
+		.setIcon(android.R.drawable.ic_dialog_alert)
+		.show();
 	}
 	
 	private class EditTextListener implements OnFocusChangeListener {
@@ -209,21 +239,20 @@ public class CreateEvent extends SimpleBaseActivity
 	boolean verifyConstraints() {
 		int values[] = new int[10];
 		boolean fail = false;
+		int rangeStart = 0, rangeEnd = INTEGERS;
 		if (!dateCheckbox.isChecked()) {
-			createEventObject(values);
-			return true;
+			rangeStart = 2;
 		}
 		try {
-			for (int i = 0; i < INTEGERS; i++) {
+			for (int i = rangeStart; i < rangeEnd; i += 2) {
 				values[i] = Integer.parseInt(dates.get(i).getText().toString());
-				if (values[i] < 0) { 
-					fail = true;
-				}
+				values[i + 1] = Integer.parseInt(dates.get(i + 1)
+						.getText().toString());
 				
-			}
-			if (values[0] > 24 || values[2] > 24 ||
-				values[1] > 59 || values[3] > 59) {
-				fail = true;
+				if (values[i] < 0 || values[i] > 24 || values[i + 1] < 0 
+						|| values[i + 1] > 59) { 
+					fail = true;
+				}	
 			}
 		} catch (Exception e) {
 			fail = true;
@@ -246,28 +275,24 @@ public class CreateEvent extends SimpleBaseActivity
 	}
 	
 	void createEventObject(int values[]) {
-		System.out.println("1");
+		String durationString = String.valueOf(1) + "/" +
+			   	 String.valueOf(1) + "/" + 
+			   	 String.valueOf(2015) + " " + 
+			   	 String.valueOf(values[2]) + ":" + 
+			     String.valueOf(values[3]);
+
 		String beginDateString = DEFAULT_DATE;				   
-		String endDateString = DEFAULT_DATE;
-		
 		if (dateCheckbox.isChecked()) {
 			beginDateString = String.valueOf(1) + "/" +
 				   		 String.valueOf(1) + "/" + 
 				   		 String.valueOf(2015) + " " + 
 				   		 String.valueOf(values[0]) + ":" + 
 				   		 String.valueOf(values[1]);
-			
-			endDateString = String.valueOf(1) + "/" +
-					   	 String.valueOf(1) + "/" + 
-					   	 String.valueOf(2015) + " " + 
-					   	 String.valueOf(values[0]) + ":" + 
-					     String.valueOf(values[1]);
 		}
-		System.out.println("2");
+		
 		Date beginDate = DateFormater.formatStringToDate(beginDateString);
-		Date endDate = DateFormater.formatStringToDate(endDateString);
+		Date endDate = DateFormater.formatStringToDate(durationString);
 		String name = dates.get(NAME_INDEX).getText().toString();
-		System.out.println("3");
 		GooglePlace place;
 		
 		if (placeSelected != null) {
@@ -314,10 +339,11 @@ public class CreateEvent extends SimpleBaseActivity
 		if (parentPlanEvent.getExactBeginDate() == 1) { 
 			dates.get(0).setText(String.valueOf(cbegin.get(Calendar.HOUR_OF_DAY)));
 			dates.get(1).setText(String.valueOf(cbegin.get(Calendar.MINUTE)));
-		
-			dates.get(2).setText(String.valueOf(cend.get(Calendar.HOUR_OF_DAY)));
-			dates.get(3).setText(String.valueOf(cend.get(Calendar.MINUTE))); 
 		}
+		
+		dates.get(2).setText(String.valueOf(cend.get(Calendar.HOUR_OF_DAY)));
+		dates.get(3).setText(String.valueOf(cend.get(Calendar.MINUTE))); 
+		
 		locationCheckbox.setChecked(parentPlanEvent.getExactLocation() == 1);
 		dateCheckbox.setChecked(parentPlanEvent.getExactBeginDate() == 1);
 	}

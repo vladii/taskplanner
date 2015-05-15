@@ -76,6 +76,7 @@ public class CreatePlan extends SimpleBaseActivity
 			Intent resultIntent = new Intent();
 			createPlanObject();
 			if (mode == 1) {
+				System.out.println(plan.getPlansEvents().size() + " size when exit");
 				if (parentInt != -1 && (!plan.toString().equals(parentPlan.toString()))) {
 					resultIntent.putExtra("EDIT_PLAN_INDEX", parentInt);
 					resultIntent.putExtra("EDIT_PLAN", plan);
@@ -87,7 +88,7 @@ public class CreatePlan extends SimpleBaseActivity
 			if (mode == 0) {
 				resultIntent.putExtra("CREATE_PLAN", plan);
 			}
-				
+			System.out.println(plan.getPlansEvents().size()+ " size when exit");
 			setResult(result, resultIntent);
 			finish();	
 		}
@@ -145,20 +146,21 @@ public class CreatePlan extends SimpleBaseActivity
 		createEvent.setOnClickListener(new ButtonCreateEvent());
 		finish.setOnClickListener(new ButtonFinish());
 		scheduleButton.setOnClickListener(new ButtonSchedule());
-		
-		/* Add the current location in the events list. */
-		GoogleCurrentLocation currLocEvent = new GoogleCurrentLocation(mGoogleApiClient);
-		currLocEvent.setCurrentLocation(this);
 	
 		Intent intent = getIntent();
 		if (intent != null) {
 			mode = intent.getIntExtra("MODE", -1);
-			if (mode == 1) {
+			if (mode == 1) { // edit plan
 				parentInt = intent.getIntExtra("EDIT_PLAN_INDEX", -1);
 				parentPlan = (Plan) intent.getParcelableExtra("EDIT_PLAN");
+				events.addAll(parentPlan.getPlansEvents());
 				populateView();
+			} else { // create plan
+				/* Add the current location in the events list. */
+				GoogleCurrentLocation currLocEvent = new GoogleCurrentLocation(mGoogleApiClient);
+				currLocEvent.setCurrentLocation(this);
 			}
-		} 
+		}
 	}
 
 	@Override
@@ -187,9 +189,12 @@ public class CreatePlan extends SimpleBaseActivity
 		}
 		
 		if (requestCode == NEW_PLAN_EVENT) {
-	    	PlanEvent planEvent = (PlanEvent) data.getParcelableExtra("PLAN_EVENT");
+	    	if (resultCode == 2) { // cancel
+	    		return;
+	    	}
+			PlanEvent planEvent = (PlanEvent) data.getParcelableExtra("PLAN_EVENT");
 	    	events.add(planEvent);
-	    	addButton(planEvent);
+	    	addView(planEvent);
 	      
 	    } else if (requestCode == EDIT_PLAN_EVENT) {
 	    	int index = data.getIntExtra("EDIT_EVENT_INDEX", -1);
@@ -198,13 +203,15 @@ public class CreatePlan extends SimpleBaseActivity
 	    	}
 	    	eventsLayout.removeViewAt(index);
 	    	events.remove(index);
-	    	PlanEvent planEvent = (PlanEvent) data.getParcelableExtra("EDIT_EVENT");
-	        events.add(planEvent);
-	        addButton(planEvent);
+	    	if (resultCode == 1) { // edit event
+	    		PlanEvent planEvent = (PlanEvent) data.getParcelableExtra("EDIT_EVENT");
+	    		events.add(planEvent);
+	    		addView(planEvent);
+	    	}
 	    }
 	}
 	
-	void addButton(PlanEvent planEvent) {
+	void addView(PlanEvent planEvent) {
     	LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
     	            LinearLayout.LayoutParams.MATCH_PARENT,
     	            LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -218,14 +225,13 @@ public class CreatePlan extends SimpleBaseActivity
 	void populateView() {
 		if (parentPlan != null) {
 			nameText.setText(parentPlan.getName());
-			events.addAll(parentPlan.getPlansEvents());
 		}
 		
     	eventsLayout.removeAllViews();
-		
 		for (PlanEvent event : events) {
-			addButton(event);
+			addView(event);
 		}
+    	
 	}
 	
 	private void createPlanObject() {
