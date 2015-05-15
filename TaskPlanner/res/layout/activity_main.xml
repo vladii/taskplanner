@@ -8,7 +8,6 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="ro.pub.cs.taskplanner.MainActivity" >
 	
-    
     <Button
         android:id="@+id/create_new_plan_button"
         android:layout_width="wrap_content"

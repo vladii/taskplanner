@@ -7,7 +7,7 @@ import java.util.List;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class Plan implements Parcelable ,Serializable{
+public class Plan implements Parcelable, Serializable {
 	private static final long serialVersionUID = 8713028020657729069L;
 	private String name;
 	private int eventsSize;

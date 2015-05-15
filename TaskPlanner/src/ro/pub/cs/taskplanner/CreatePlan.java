@@ -30,6 +30,7 @@ public class CreatePlan extends SimpleBaseActivity
 	Button finish;
 	Button createEvent;
 	Button scheduleButton;
+	Button notifyButton;
 	LinearLayout eventsLayout;
 	
 	protected GoogleApiClient mGoogleApiClient;
@@ -45,6 +46,7 @@ public class CreatePlan extends SimpleBaseActivity
 	private static final String INITIAL_NAME = "Write name here";
 	
 	public List<PlanEvent> events;
+	public List<EventNotificationManager> notifications;
 	
 	private class EditTextListener implements OnFocusChangeListener  {
 		@Override
@@ -108,6 +110,31 @@ public class CreatePlan extends SimpleBaseActivity
 		}
 	}
 	
+	private class ButtonNotify implements Button.OnClickListener {
+		@Override
+		public void onClick(View v) {
+			/* Start notifications for all events. */
+			/* TODO */
+			
+			/* Code just for test. Start a notification after 10 sec. */
+			PlanEvent prevEvent = null;
+			for (PlanEvent event : events) {
+				EventNotificationManager notificationManager =
+						new EventNotificationManager(getApplicationContext(), prevEvent, event);
+
+				notificationManager.schedule();
+				
+				notifications.add(notificationManager);
+				
+				prevEvent = event;
+			}
+			
+			/* Show a message :-). */
+			Toast.makeText(getApplicationContext(), "You will receive notifications before each event!",
+							Toast.LENGTH_SHORT).show();
+		}
+	}
+	
 	private class EditEventListener implements Button.OnClickListener {
 		@Override
 		public void onClick(View v) {
@@ -137,9 +164,12 @@ public class CreatePlan extends SimpleBaseActivity
 					.addApi(Places.PLACE_DETECTION_API)
 					.build();
 	
+		notifications = new ArrayList<EventNotificationManager>();
+		
 		createEvent = (Button) findViewById(R.id.newEvent);
 		finish = (Button) findViewById(R.id.finishPlan);
 		scheduleButton = (Button) findViewById(R.id.scheduleButton);
+		notifyButton = (Button) findViewById(R.id.notificationButton);
 		eventsLayout = (LinearLayout) findViewById(R.id.eventsLayout);
 		
 		events = new ArrayList<PlanEvent>();
@@ -150,6 +180,7 @@ public class CreatePlan extends SimpleBaseActivity
 		createEvent.setOnClickListener(new ButtonCreateEvent());
 		finish.setOnClickListener(new ButtonFinish());
 		scheduleButton.setOnClickListener(new ButtonSchedule());
+		notifyButton.setOnClickListener(new ButtonNotify());
 	
 		Intent intent = getIntent();
 		if (intent != null) {
@@ -247,6 +278,18 @@ public class CreatePlan extends SimpleBaseActivity
 			id = parentPlan.getId();
 		}
 		plan = new Plan(name, id, events);
+	}
+	
+	 @Override
+	 protected void onStop() {
+		 // When our activity is stopped ensure we also stop the connection to the service
+		 // this stops us leaking our activity into the system *bad*
+	    for (EventNotificationManager notification : notifications) {
+	    	if (notification != null)
+	    		notification.stop();
+	    }
+	    
+	    super.onStop();
 	}
 	
 	@Override

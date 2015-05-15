@@ -110,8 +110,8 @@ int drawable ic_plusone_tall_off_client 0x7f02001e
 int drawable powered_by_google_dark 0x7f02001f
 int drawable powered_by_google_light 0x7f020020
 int id TextView01 0x7f0c0023
-int id action_settings 0x7f0c0030
-int id activities_label 0x7f0c002d
+int id action_settings 0x7f0c0031
+int id activities_label 0x7f0c002e
 int id adjust_height 0x7f0c0000
 int id adjust_width 0x7f0c0001
 int id beginDate 0x7f0c001c
@@ -124,7 +124,7 @@ int id buy_with_google 0x7f0c0012
 int id checkBoxDate 0x7f0c001b
 int id checkBoxLocation 0x7f0c0019
 int id classic 0x7f0c0014
-int id create_new_plan_button 0x7f0c002c
+int id create_new_plan_button 0x7f0c002d
 int id donate_with_google 0x7f0c0013
 int id duration 0x7f0c001f
 int id eventName 0x7f0c0018
@@ -136,7 +136,7 @@ int id holo_dark 0x7f0c0007
 int id holo_light 0x7f0c0008
 int id hoursDuration 0x7f0c0020
 int id hybrid 0x7f0c0003
-int id linearLayout 0x7f0c002f
+int id linearLayout 0x7f0c0030
 int id location 0x7f0c001a
 int id match_parent 0x7f0c000e
 int id minutesDuration 0x7f0c0021
@@ -144,13 +144,14 @@ int id monochrome 0x7f0c0016
 int id newEvent 0x7f0c0026
 int id none 0x7f0c0002
 int id normal 0x7f0c0004
+int id notificationButton 0x7f0c002c
 int id planName 0x7f0c0027
 int id production 0x7f0c0009
 int id removeEvent 0x7f0c0025
 int id sandbox 0x7f0c000a
 int id satellite 0x7f0c0005
 int id scheduleButton 0x7f0c002b
-int id scrollView 0x7f0c002e
+int id scrollView 0x7f0c002f
 int id scrollView1 0x7f0c0028
 int id selectionDetails 0x7f0c000d
 int id slide 0x7f0c0017
