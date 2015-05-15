@@ -1,11 +1,14 @@
 package ro.pub.cs.taskplanner;
 
+import java.io.Serializable;
+
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.android.gms.maps.model.LatLng;
 
-public class GooglePlace implements Parcelable {
+public class GooglePlace implements Parcelable, Serializable {
+	private static final long serialVersionUID = -6512501041908212436L;
 	private String id;
 	private String placeId;
 	private String name;

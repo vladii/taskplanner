@@ -1,5 +1,6 @@
 package ro.pub.cs.taskplanner;
 
+import java.io.Serializable;
 import java.util.*;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -11,6 +12,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,6 +25,8 @@ import android.widget.Toast;
 
 public class CreatePlan extends SimpleBaseActivity
 	implements GoogleApiClient.OnConnectionFailedListener {
+
+	private static final long serialVersionUID = 1L;
 	Button finish;
 	Button createEvent;
 	Button scheduleButton;
@@ -76,19 +80,19 @@ public class CreatePlan extends SimpleBaseActivity
 			Intent resultIntent = new Intent();
 			createPlanObject();
 			if (mode == 1) {
-				System.out.println(plan.getPlansEvents().size() + " size when exit");
 				if (parentInt != -1 && (!plan.toString().equals(parentPlan.toString()))) {
 					resultIntent.putExtra("EDIT_PLAN_INDEX", parentInt);
-					resultIntent.putExtra("EDIT_PLAN", plan);
+					resultIntent.putExtra("EDIT_PLAN", (Parcelable)plan);
+					System.out.println("CREATE PLAN return edited plan : " + plan.toString());
 				} else {
 					result = 0;
 				}
 			}
 
 			if (mode == 0) {
-				resultIntent.putExtra("CREATE_PLAN", plan);
+				resultIntent.putExtra("CREATE_PLAN", (Parcelable)plan);
+				System.out.println("CREATE PLAN return new plan : " + plan.toString());
 			}
-			System.out.println(plan.getPlansEvents().size()+ " size when exit");
 			setResult(result, resultIntent);
 			finish();	
 		}
@@ -117,7 +121,7 @@ public class CreatePlan extends SimpleBaseActivity
 			Intent intent = new Intent("ro.pub.cs.taskplanner.CreateEvent");
 			intent.putExtra("MODE", 1);
 			intent.putExtra("EDIT_EVENT_INDEX", index);
-			intent.putExtra("EDIT_EVENT", events.get(index));
+			intent.putExtra("EDIT_EVENT", (Parcelable)events.get(index));
 			startActivityForResult(intent, EDIT_PLAN_EVENT);
 		}
 	}
@@ -154,6 +158,7 @@ public class CreatePlan extends SimpleBaseActivity
 				parentInt = intent.getIntExtra("EDIT_PLAN_INDEX", -1);
 				parentPlan = (Plan) intent.getParcelableExtra("EDIT_PLAN");
 				events.addAll(parentPlan.getPlansEvents());
+				System.out.println("CREATE PLAN received plan to edit : " + parentPlan.toString());
 				populateView();
 			} else { // create plan
 				/* Add the current location in the events list. */

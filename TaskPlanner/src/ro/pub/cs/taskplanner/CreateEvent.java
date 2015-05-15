@@ -124,6 +124,7 @@ public class CreateEvent extends SimpleBaseActivity
 			mode = intent.getIntExtra("MODE", -1);
 			if (mode == 1) {
 				remove.setText("Remove event");
+				finish.setText("Back");
 				parentInt = intent.getIntExtra("EDIT_EVENT_INDEX", -1);
 				parentPlanEvent = (PlanEvent) intent.getParcelableExtra("EDIT_EVENT");
 				populateView();
@@ -158,14 +159,14 @@ public class CreateEvent extends SimpleBaseActivity
 				if (mode == 1) {
 					if (parentInt != -1 && (!planEvent.toString().equals(parentPlanEvent.toString()))) {
 						resultIntent.putExtra("EDIT_EVENT_INDEX", parentInt);
-						resultIntent.putExtra("EDIT_EVENT", planEvent);
+						resultIntent.putExtra("EDIT_EVENT", (Parcelable)planEvent);
 					} else {
 						result = 0;
 					}
 				}
 				
 				if (mode == 0) {
-					resultIntent.putExtra("PLAN_EVENT", planEvent);
+					resultIntent.putExtra("PLAN_EVENT", (Parcelable)planEvent);
 				}
 				
 				setResult(result, resultIntent);
@@ -317,11 +318,9 @@ public class CreateEvent extends SimpleBaseActivity
 		} else {
 			planEvent.setExactBeginDate(0);
 		}
-		System.out.println(planEvent.toString());
 	}
 	
 	void populateView() {
-		System.out.println(parentPlanEvent.toString());
 		dates.get(NAME_INDEX).setText(parentPlanEvent.getName());
 	
 		Calendar cbegin = Calendar.getInstance();
@@ -330,7 +329,6 @@ public class CreateEvent extends SimpleBaseActivity
 		cend.setTime(parentPlanEvent.getEndDate());
 		
 		placeSelected = parentPlanEvent.getLocation();
-		System.out.println(placeSelected.toString() + " location ");
 		try {
 			autoCompView.setText(placeSelected.getAddress().toString());
 		} catch (Exception e) {

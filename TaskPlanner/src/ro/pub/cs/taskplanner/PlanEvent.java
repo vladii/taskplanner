@@ -1,5 +1,6 @@
 package ro.pub.cs.taskplanner;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -7,7 +8,9 @@ import java.util.Locale;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class PlanEvent implements Parcelable {
+public class PlanEvent implements Parcelable, Serializable{
+
+	private static final long serialVersionUID = 6980514441891816832L;
 	private String name;
 	private Date beginDate;
 	private Date endDate;

@@ -1,12 +1,19 @@
 package ro.pub.cs.taskplanner;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import ro.pub.cs.taskplanner.*;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,6 +28,7 @@ public class MainActivity extends Activity {
 	private int idCounter = 1;
 	private final static int EDIT_PLAN = 1;
 	private final static int CREATE_PLAN = 0;
+	private final static String SAVE_DATA_FILE = "taskPlannerData.txt";
 	
 	
 	private class ButtonCreatePlan implements Button.OnClickListener {
@@ -37,18 +45,19 @@ public class MainActivity extends Activity {
 		@Override
 		public void onClick(View v) {
 			int index = -1;
-			
-			for (int i = 0; i < plans.size() ; i++) {
-				if (v.getId() == plansLayout.getChildAt(i).getId()) {
+			for (int i = 0; i < plans.size() && i < plansLayout.getChildCount() ; i++) {
+				int idv = v.getId();
+				View lv = plansLayout.getChildAt(i);
+				int idl = lv.getId();
+				if (idv == idl) {
 					index = i;
 				}
 			}
 			if (index < 0) { return; }
-			
 			Intent intent = new Intent("ro.pub.cs.taskplanner.CreatePlan");
 			intent.putExtra("MODE", EDIT_PLAN);
 			intent.putExtra("EDIT_PLAN_INDEX", index);
-			intent.putExtra("EDIT_PLAN", plans.get(index));
+			intent.putExtra("EDIT_PLAN", (Parcelable)plans.get(index));
 			startActivityForResult(intent, EDIT_PLAN);
 		}
 	}
@@ -70,36 +79,36 @@ public class MainActivity extends Activity {
 		
 		createPlan.setOnClickListener(new ButtonCreatePlan());
 		
-		if (savedInstanceState != null) {
-			// TODO
-		}
+		readPlansFromFile();
 	}
 	
 	@Override
 	protected void onActivityResult (int requestCode, int resultCode, Intent data) {
 		if (resultCode == 0) {
+			System.out.println("Result code 0. Exit");
 			return;
 		}
 		
 		if (requestCode == CREATE_PLAN) {
 	    	Plan plan = (Plan) data.getParcelableExtra("CREATE_PLAN");
 	    	plans.add(plan);
-	    	addButton(plan);
-	      
+	    	addView(plan);
+	
 	    } else if (requestCode == EDIT_PLAN) {
 	    	int index = data.getIntExtra("EDIT_PLAN_INDEX", -1);
 	    	if (index == -1) {
+	    		System.out.println("plan not changed. exiting");
 	    		return;
 	    	}
 	    	plansLayout.removeViewAt(index);
 	    	plans.remove(index);
 	    	Plan plan = (Plan) data.getParcelableExtra("EDIT_PLAN");
-	        plans.add(plan);
-	        addButton(plan);
+	    	plans.add(plan);
+	        addView(plan);
 	    }
-	}	
+	}
 	
-	private void addButton(Plan plan) {
+	private void addView(Plan plan) {
     	LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
     	            LinearLayout.LayoutParams.MATCH_PARENT,
     	            LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -108,6 +117,7 @@ public class MainActivity extends Activity {
     	button.setId(idCounter ++);
     	plansLayout.addView(button , params);
     	button.setOnClickListener(new ButtonEditActivity());
+    	writePlansToFile();
 	}
 
 	@Override
@@ -128,4 +138,57 @@ public class MainActivity extends Activity {
 		}
 		return super.onOptionsItemSelected(item);
 	}
+
+	public boolean writePlansToFile(){
+        FileOutputStream fos;
+        ObjectOutputStream oos=null;
+        try{
+            fos = getApplicationContext().openFileOutput(SAVE_DATA_FILE, Context.MODE_PRIVATE);
+            oos = new ObjectOutputStream(fos);
+            oos.writeObject(plans);
+            oos.flush();
+            oos.close();
+            return true;
+        } catch(Exception e) {
+        	System.out.println("Error writing data " + e.getMessage());
+            return false;
+        }
+        finally{
+            if(oos!=null) {
+                try {
+                    oos.close();
+                }catch(Exception e){
+                	System.out.println("Error closing file" + e.getMessage());
+                }
+            }
+        }
+	}
+
+	private boolean readPlansFromFile() {
+        FileInputStream fin;
+        ObjectInputStream ois=null;
+        try{
+            fin = getApplicationContext().openFileInput(SAVE_DATA_FILE);
+            ois = new ObjectInputStream(fin);   
+            plans.clear();
+            plans = (ArrayList<Plan>) ois.readObject();
+            for (int i = 0; i < plans.size(); i++) {
+            	addView(plans.get(i));
+            }
+            ois.close();
+            return true;
+            } catch(Exception e) {
+                System.out.println("Error reading from file" + e.getMessage());
+                return false;
+            }
+        finally {
+        	if(ois!=null) {
+        		try {
+        			ois.close();
+        		} catch(Exception e) {
+        			System.out.println("Error closing the file" + e.getMessage());
+        		}
+        	}
+        }
+    }
 }
