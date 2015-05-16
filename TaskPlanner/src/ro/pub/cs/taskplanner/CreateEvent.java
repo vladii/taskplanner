@@ -334,9 +334,13 @@ public class CreateEvent extends SimpleBaseActivity
 		} catch (Exception e) {
 			autoCompView.setText("Write location here");
 		}
+		
 		if (parentPlanEvent.getExactBeginDate() == 1) { 
 			dates.get(0).setText(String.valueOf(cbegin.get(Calendar.HOUR_OF_DAY)));
 			dates.get(1).setText(String.valueOf(cbegin.get(Calendar.MINUTE)));
+		} else {
+			dates.get(0).setText("hh");
+			dates.get(1).setText("mm");
 		}
 		
 		dates.get(2).setText(String.valueOf(cend.get(Calendar.HOUR_OF_DAY)));

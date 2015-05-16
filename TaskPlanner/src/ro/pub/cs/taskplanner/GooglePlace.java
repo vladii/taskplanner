@@ -1,5 +1,9 @@
 package ro.pub.cs.taskplanner;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OptionalDataException;
 import java.io.Serializable;
 
 import android.os.Parcel;
@@ -125,5 +129,39 @@ public class GooglePlace implements Parcelable, Serializable {
 			return new GooglePlace[size];
 		}
 	};
+	
+	/* Serialization functions. */
+	private void writeObject(java.io.ObjectOutputStream out) {
+		try {
+			out.writeObject(id);
+			out.writeObject(placeId);
+			out.writeObject(name);
+			out.writeObject(address);
+			out.writeInt(open ? 1 : 0);
+			out.writeDouble(coords.latitude);
+			out.writeDouble(coords.longitude);
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	 }
+	 
+	 private void readObject(java.io.ObjectInputStream in) {
+		 try {
+			this.id = (String) in.readObject();
+			this.placeId = (String) in.readObject();
+			this.name = (String) in.readObject();
+			this.address = (String) in.readObject();
+			this.open = in.readInt() == 1 ? true : false;
+			
+			double lat = in.readDouble();
+			double lng = in.readDouble();
+			
+			this.coords = new LatLng(lat, lng);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	 }
 }
 

@@ -19,11 +19,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 public class MainActivity extends Activity {
 
 	private LinearLayout plansLayout;
 	private Button createPlan;
+	private Button savePlansButton;
 	private List<Plan> plans;
 	private int idCounter = 1;
 	private final static int EDIT_PLAN = 1;
@@ -32,12 +34,19 @@ public class MainActivity extends Activity {
 	
 	
 	private class ButtonCreatePlan implements Button.OnClickListener {
-		
 		@Override
 		public void onClick(View v) {	
 			Intent intent = new Intent("ro.pub.cs.taskplanner.CreatePlan");
 			intent.putExtra("MODE", CREATE_PLAN);
 			startActivityForResult(intent, CREATE_PLAN);
+		}
+	}
+	
+	private class ButtonSavePlan implements Button.OnClickListener {
+		@Override
+		public void onClick(View v) {	
+			// Write all plans to file.
+			writePlansToFile();
 		}
 	}
 	
@@ -68,6 +77,7 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 
 		createPlan = (Button) findViewById(R.id.create_new_plan_button);
+		savePlansButton = (Button) findViewById(R.id.savePlansButton);
 		plansLayout = (LinearLayout) findViewById(R.id.linearLayout);
 		plans = new ArrayList<Plan>();
 		int layoutSize = plansLayout.getChildCount();
@@ -78,7 +88,9 @@ public class MainActivity extends Activity {
 		}
 		
 		createPlan.setOnClickListener(new ButtonCreatePlan());
+		savePlansButton.setOnClickListener(new ButtonSavePlan());
 		
+		// Populate the list of plans.
 		readPlansFromFile();
 	}
 	
@@ -141,16 +153,27 @@ public class MainActivity extends Activity {
 
 	public boolean writePlansToFile(){
         FileOutputStream fos;
-        ObjectOutputStream oos=null;
+        ObjectOutputStream oos = null;
+        
         try{
             fos = getApplicationContext().openFileOutput(SAVE_DATA_FILE, Context.MODE_PRIVATE);
             oos = new ObjectOutputStream(fos);
             oos.writeObject(plans);
             oos.flush();
             oos.close();
+            
+            Toast.makeText(this,
+    				"Plans were successfully saved!",
+    				Toast.LENGTH_SHORT).show();
+            
             return true;
         } catch(Exception e) {
         	System.out.println("Error writing data " + e.getMessage());
+        	
+        	Toast.makeText(this,
+    				"Oops, error while saving your plans! Try again!",
+    				Toast.LENGTH_SHORT).show();
+        	
             return false;
         }
         finally{

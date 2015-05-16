@@ -490,7 +490,7 @@ containing a value of this type.
     }
     public static final class id {
         public static final int TextView01=0x7f0c0023;
-        public static final int action_settings=0x7f0c0031;
+        public static final int action_settings=0x7f0c0032;
         public static final int activities_label=0x7f0c002e;
         public static final int adjust_height=0x7f0c0000;
         public static final int adjust_width=0x7f0c0001;
@@ -530,6 +530,7 @@ containing a value of this type.
         public static final int removeEvent=0x7f0c0025;
         public static final int sandbox=0x7f0c000a;
         public static final int satellite=0x7f0c0005;
+        public static final int savePlansButton=0x7f0c0031;
         public static final int scheduleButton=0x7f0c002b;
         public static final int scrollView=0x7f0c002f;
         public static final int scrollView1=0x7f0c0028;
