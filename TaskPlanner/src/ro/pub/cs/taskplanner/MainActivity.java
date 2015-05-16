@@ -1,19 +1,47 @@
 package ro.pub.cs.taskplanner;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
+import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.drive.Drive;
+import com.google.android.gms.drive.DriveApi.DriveContentsResult;
+import com.google.android.gms.drive.DriveApi.DriveIdResult;
+import com.google.android.gms.drive.DriveContents;
+import com.google.android.gms.drive.DriveFile;
+import com.google.android.gms.drive.DriveId;
+import com.google.android.gms.drive.MetadataChangeSet;
+import com.google.android.gms.drive.OpenFileActivityBuilder;
+import com.google.android.gms.plus.Plus;
 
 import ro.pub.cs.taskplanner.*;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentSender;
+import android.content.IntentSender.SendIntentException;
 import android.os.Bundle;
 import android.os.Parcel;
+import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,16 +50,21 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 public class MainActivity extends Activity {
-
 	private LinearLayout plansLayout;
 	private Button createPlan;
 	private Button savePlansButton;
+	private Button syncLocallyButton;
+	private Button syncGoogleDriveButton;
 	private List<Plan> plans;
 	private int idCounter = 1;
 	private final static int EDIT_PLAN = 1;
 	private final static int CREATE_PLAN = 0;
-	private final static String SAVE_DATA_FILE = "taskPlannerData.txt";
+	protected static final int REQUEST_CODE_CREATOR = 3;
 	
+	public final static String SAVE_DATA_FILE = "taskPlannerData.txt";
+	public static DriveId fileId = null;	// File Id on Google Drive
+	
+	private GoogleApiClient clientGoogleApi = null;
 	
 	private class ButtonCreatePlan implements Button.OnClickListener {
 		@Override
@@ -47,6 +80,22 @@ public class MainActivity extends Activity {
 		public void onClick(View v) {	
 			// Write all plans to file.
 			writePlansToFile();
+		}
+	}
+	
+	private class ButtonSyncLocally implements Button.OnClickListener {
+		@Override
+		public void onClick(View v) {	
+			// Read plans from local file.
+			readPlansFromFile();
+		}
+	}
+	
+	private class ButtonSyncGoogleDrive implements Button.OnClickListener {
+		@Override
+		public void onClick(View v) {	
+			// Read plans from Google Drive.
+			readPlansFromGoogleDrive();
 		}
 	}
 	
@@ -75,9 +124,16 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		
+		// Get Google API.
+		clientGoogleApi = GoogleApiClientSingleton.get();
 
+		// Add listeners.
 		createPlan = (Button) findViewById(R.id.create_new_plan_button);
 		savePlansButton = (Button) findViewById(R.id.savePlansButton);
+		syncLocallyButton = (Button) findViewById(R.id.syncLocallyButton);
+		syncGoogleDriveButton = (Button) findViewById(R.id.syncGoogleDriveButton);
+		
 		plansLayout = (LinearLayout) findViewById(R.id.linearLayout);
 		plans = new ArrayList<Plan>();
 		int layoutSize = plansLayout.getChildCount();
@@ -89,9 +145,8 @@ public class MainActivity extends Activity {
 		
 		createPlan.setOnClickListener(new ButtonCreatePlan());
 		savePlansButton.setOnClickListener(new ButtonSavePlan());
-		
-		// Populate the list of plans.
-		readPlansFromFile();
+		syncLocallyButton.setOnClickListener(new ButtonSyncLocally());
+		syncGoogleDriveButton.setOnClickListener(new ButtonSyncGoogleDrive());
 	}
 	
 	@Override
@@ -117,6 +172,7 @@ public class MainActivity extends Activity {
 	    	Plan plan = (Plan) data.getParcelableExtra("EDIT_PLAN");
 	    	plans.add(plan);
 	        addView(plan);
+	    
 	    }
 	}
 	
@@ -129,7 +185,6 @@ public class MainActivity extends Activity {
     	button.setId(idCounter ++);
     	plansLayout.addView(button , params);
     	button.setOnClickListener(new ButtonEditActivity());
-    	writePlansToFile();
 	}
 
 	@Override
@@ -151,7 +206,12 @@ public class MainActivity extends Activity {
 		return super.onOptionsItemSelected(item);
 	}
 
-	public boolean writePlansToFile(){
+	public void writePlansToFile(){
+		// Write on drive.
+		if (fileId != null)
+			writePlansToDrive(fileId);
+		
+		// Write locally.
         FileOutputStream fos;
         ObjectOutputStream oos = null;
         
@@ -163,18 +223,15 @@ public class MainActivity extends Activity {
             oos.close();
             
             Toast.makeText(this,
-    				"Plans were successfully saved!",
+    				"Plans were successfully saved on your disk!",
     				Toast.LENGTH_SHORT).show();
             
-            return true;
         } catch(Exception e) {
         	System.out.println("Error writing data " + e.getMessage());
         	
         	Toast.makeText(this,
     				"Oops, error while saving your plans! Try again!",
     				Toast.LENGTH_SHORT).show();
-        	
-            return false;
         }
         finally{
             if(oos!=null) {
@@ -186,22 +243,176 @@ public class MainActivity extends Activity {
             }
         }
 	}
+	
+	/* Write file to drive when we know its file ID. */
+	private void writePlansToDrive(DriveId fileID) {
+		clientGoogleApi = GoogleApiClientSingleton.get();
+		
+        if (clientGoogleApi == null || !clientGoogleApi.isConnected()) {
+        	Toast.makeText(this,
+    				"You are not logged in with Google!",
+    				Toast.LENGTH_SHORT).show();
+        	
+        	return;
+        }
+        
+        final Context mainContext = this;
+        DriveFile file = Drive.DriveApi.getFile(clientGoogleApi, fileID);
+        
+        // Write on drive.
+        file.open(clientGoogleApi, DriveFile.MODE_WRITE_ONLY, null).setResultCallback(new ResultCallback<DriveContentsResult>() {
+            @Override
+            public void onResult(DriveContentsResult result) {
+                if (!result.getStatus().isSuccess()) {
+                    // Handle error.
+                    return;
+                }
+                
+                DriveContents contents = result.getDriveContents();
+                
+                try {
+                    ParcelFileDescriptor parcelFileDescriptor = contents.getParcelFileDescriptor();
+                    
+                    // Append to the file.
+                    FileOutputStream fileOutputStream = new FileOutputStream(parcelFileDescriptor
+                        .getFileDescriptor());
+                    
+                    ObjectOutputStream oos = new ObjectOutputStream(fileOutputStream);
+                    oos.writeObject(plans);
+                    
+                    contents.commit(clientGoogleApi, null).setResultCallback(new ResultCallback<Status>() {
+                        @Override
+                        public void onResult(Status result) {
+                            // Wonderful! File saved.
+                        	System.out.println("Commit results: " + result);
+                        	
+                        	Toast.makeText(mainContext,
+                    				"Plans saved on your Google Drive!",
+                    				Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        });
+	}
+	
+	final private class RetrieveDriveFileContentsAsyncTask
+    	extends ApiClientAsyncTask<DriveId, Boolean, String> {
+
+		public RetrieveDriveFileContentsAsyncTask(Context context) {
+			super(context);
+		}
+
+		@Override
+		protected String doInBackgroundConnected(DriveId... params) {
+			String contents = null;
+			DriveFile file = Drive.DriveApi.getFile(GoogleApiClientSingleton.get(), params[0]);
+			DriveContentsResult driveContentsResult =
+					file.open(GoogleApiClientSingleton.get(), DriveFile.MODE_READ_ONLY, null).await();
+			
+			System.out.println(driveContentsResult.getStatus());
+			
+			if (!driveContentsResult.getStatus().isSuccess()) {
+				return null;
+			}
+			
+			DriveContents driveContents = driveContentsResult.getDriveContents();
+			ObjectInputStream reader = null;
+			
+			try {
+				reader = new ObjectInputStream(driveContents.getInputStream());
+				
+				plans.clear();
+		        plans = (ArrayList<Plan>) reader.readObject();
+		        
+		        reader.close();
+				
+			} catch (Exception e) {
+				return null;
+			}
+			
+			if (reader != null) {
+				try {
+					reader.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+
+			driveContents.discard(GoogleApiClientSingleton.get());
+			return "ok";
+		}
+
+		@Override
+		protected void onPostExecute(String result) {
+			super.onPostExecute(result);
+			
+			if (result != null) {
+				updateView(true);
+				
+			} else {
+				updateView(false);
+			}
+		}
+	}
+	
+	final private ResultCallback<DriveIdResult> idCallback = new ResultCallback<DriveIdResult>() {
+        @Override
+        public void onResult(DriveIdResult result) {
+            new RetrieveDriveFileContentsAsyncTask(MainActivity.this).execute(result.getDriveId());
+        }
+    };
+	
+	private void readPlansFromGoogleDrive() {
+		if (fileId == null || GoogleApiClientSingleton.get() == null ||
+			!GoogleApiClientSingleton.get().isConnected()) {
+			Toast.makeText(this,
+    			"Error when loading plans from your Google Drive! Check your connection!",
+    			Toast.LENGTH_SHORT).show();
+			
+			return;
+		}
+		
+		// Read file.
+		Drive.DriveApi.fetchDriveId(GoogleApiClientSingleton.get(), fileId.getResourceId())
+        	.setResultCallback(idCallback);
+	}
 
 	private boolean readPlansFromFile() {
         FileInputStream fin;
-        ObjectInputStream ois=null;
+        ObjectInputStream ois = null;
+        
         try{
             fin = getApplicationContext().openFileInput(SAVE_DATA_FILE);
             ois = new ObjectInputStream(fin);   
+            
             plans.clear();
+            idCounter = 1;
+            plansLayout.removeAllViews();
+            
             plans = (ArrayList<Plan>) ois.readObject();
             for (int i = 0; i < plans.size(); i++) {
             	addView(plans.get(i));
             }
             ois.close();
+            
+            Toast.makeText(this,
+    				"Plans were successfully loaded from local drive!",
+    				Toast.LENGTH_SHORT).show();
+            
             return true;
+            
             } catch(Exception e) {
                 System.out.println("Error reading from file" + e.getMessage());
+                
+                Toast.makeText(this,
+        				"Error when loading plans from local drive!",
+        				Toast.LENGTH_SHORT).show();
+                
                 return false;
             }
         finally {
@@ -214,4 +425,24 @@ public class MainActivity extends Activity {
         	}
         }
     }
+	
+	/* Function called by Google Drive request file content handler. */
+	public void updateView(Boolean reallyUpdated) {
+		if (reallyUpdated) {
+			idCounter = 1;
+			plansLayout.removeAllViews();
+
+			for (int i = 0; i < plans.size(); i++) {
+				addView(plans.get(i));
+			}
+			
+			Toast.makeText(this,
+		        	"Plans were successfully loaded from your Google Drive!",
+		    		Toast.LENGTH_SHORT).show();
+		} else {
+			Toast.makeText(this,
+		        	"Error when retrieving your plans from Google Drive!",
+		    		Toast.LENGTH_SHORT).show();
+		}
+	}
 }

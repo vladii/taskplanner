@@ -7,15 +7,6 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="ro.pub.cs.taskplanner.MainActivity" >
-	
-    <Button
-        android:id="@+id/create_new_plan_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="14dp"
-        android:text="Create New Plan" />
 
     <EditText
         android:id="@+id/activities_label"
@@ -52,12 +43,36 @@
     </ScrollView>
 
     <Button
+        android:id="@+id/create_new_plan_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="34dp"
+        android:text="Create New Plan" />
+
+    <Button
         android:id="@+id/savePlansButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_above="@+id/activities_label"
+        android:layout_alignParentRight="true"
+        android:text="Save plans" />
+
+    <Button
+        android:id="@+id/syncLocallyButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="18dp"
-        android:text="Save your plans!" />
+        android:text="Sync locally" />
+
+    <Button
+        android:id="@+id/syncGoogleDriveButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/syncLocallyButton"
+        android:layout_alignBottom="@+id/syncLocallyButton"
+        android:layout_alignRight="@+id/savePlansButton"
+        android:text="Sync with G Drive" />
 
 </RelativeLayout>
