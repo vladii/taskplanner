@@ -6,7 +6,7 @@ import java.util.Locale;
 
 public class DateFormater {
 
-	public static final String DATE_FORMAT = "dd/MM/yyyy hh:mm";
+	public static final String DATE_FORMAT = "dd/MM/yyyy HH:mm";
 	
 	
 	public static String formateDateToString(Date date) {

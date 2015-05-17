@@ -330,7 +330,11 @@ public class CreateEvent extends SimpleBaseActivity
 		
 		placeSelected = parentPlanEvent.getLocation();
 		try {
-			autoCompView.setText(placeSelected.getAddress().toString());
+			if (placeSelected.getAddress() != null)
+				autoCompView.setText(placeSelected.getAddress().toString());
+			else
+				autoCompView.setText(placeSelected.getName());
+			
 		} catch (Exception e) {
 			autoCompView.setText("Write location here");
 		}
