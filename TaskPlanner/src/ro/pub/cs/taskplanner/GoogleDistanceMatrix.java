@@ -39,36 +39,50 @@ import com.google.android.gms.maps.model.LatLng;
 public class GoogleDistanceMatrix {
 	public static final String API_KEY = "AIzaSyCBjG_0s0H3h9IsIrpLMEFHeOmEnY7TS9s";
 	private String responseString;
-	private List<GooglePlace> places;
+	private List<GooglePlace> origins;
+	private List<GooglePlace> destinations;
 	private String mode;
 	
-	public GoogleDistanceMatrix(List<GooglePlace> places, String mode) {
-		this.places = places;
+	public GoogleDistanceMatrix(List<GooglePlace> oPlaces, List<GooglePlace> dPlaces, String mode) {
+		this.origins = oPlaces;
+		this.destinations = dPlaces;
 		this.mode = mode;
 	}
 	
-	public GoogleDistanceMatrix(List<GooglePlace> places) {
-		this(places, "car");
+	public GoogleDistanceMatrix(List<GooglePlace> oPlaces, List<GooglePlace> dPlaces) {
+		this(oPlaces, dPlaces, "car");
 	}
 	
 	public List<List<GoogleDistance> > getDistanceMatrix() {
-		String origins = "";
-		String destinations = "";
+		String originsString = "";
+		String destinationsString = "";
 		
 		boolean first = true;
-		for (GooglePlace place : places) {
+		for (GooglePlace place : origins) {
 			if (first) {
 				first = false;
 			} else {
-				origins += URLEncoder.encode("|");
+				originsString += URLEncoder.encode("|");
 			}
 			
-			origins += place.getCoords().latitude + "," +
+			originsString += place.getCoords().latitude + "," +
+					   place.getCoords().longitude;
+		}
+		
+		first = true;
+		for (GooglePlace place : destinations) {
+			if (first) {
+				first = false;
+			} else {
+				destinationsString += URLEncoder.encode("|");
+			}
+			
+			destinationsString += place.getCoords().latitude + "," +
 					   place.getCoords().longitude;
 		}
 		
 		String url = "https://maps.googleapis.com/maps/api/distancematrix/json" +
-					 "?origins=" + origins + "&destinations=" + origins +
+					 "?origins=" + originsString + "&destinations=" + destinationsString +
 					 "&mode=" + mode +
 					 "&key=" + API_KEY;
 		

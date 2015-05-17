@@ -326,12 +326,12 @@ public class CreateEvent extends SimpleBaseActivity
 		Calendar cbegin = Calendar.getInstance();
 		cbegin.setTime(parentPlanEvent.getBeginDate());
 		Calendar cend = Calendar.getInstance();
-		cend.setTime(parentPlanEvent.getEndDate());
+		cend.setTime(parentPlanEvent.getDuration());
 		
 		placeSelected = parentPlanEvent.getLocation();
 		try {
 			if (placeSelected.getAddress() != null)
-				autoCompView.setText(placeSelected.getAddress().toString());
+				autoCompView.setText(placeSelected.toString());
 			else
 				autoCompView.setText(placeSelected.getName());
 			

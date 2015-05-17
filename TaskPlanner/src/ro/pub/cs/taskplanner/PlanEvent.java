@@ -8,20 +8,21 @@ import java.util.Locale;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class PlanEvent implements Parcelable, Serializable{
+public class PlanEvent implements Parcelable, Serializable, Comparable{
 
 	private static final long serialVersionUID = 6980514441891816832L;
+
 	private String name;
 	private Date beginDate;
-	private Date endDate;
+	private Date duration;
 	private Integer exactLocation;
 	private Integer exactBeginDate;
 	private GooglePlace location;
-	
+
 	public PlanEvent (String name, Date bDate, Date eDate, GooglePlace location) {
 		this.name = name;
 		this.beginDate = bDate;
-		this.endDate = eDate;
+		this.duration = eDate;
 		this.location = location;
 		
 		this.exactLocation = 1;
@@ -31,7 +32,7 @@ public class PlanEvent implements Parcelable, Serializable{
 	private PlanEvent (Parcel in) {
 		this.name = in.readString();
 		this.beginDate = DateFormater.formatStringToDate(in.readString());
-		this.endDate = DateFormater.formatStringToDate(in.readString());
+		this.duration = DateFormater.formatStringToDate(in.readString());
 		this.exactLocation = in.readInt();
 		this.exactBeginDate = in.readInt();
 		this.location = in.readParcelable(GooglePlace.class.getClassLoader());
@@ -40,17 +41,9 @@ public class PlanEvent implements Parcelable, Serializable{
 	public Integer getExactLocation() {
 		return this.exactLocation;
 	}
-	
-	public void setExactLocation(Integer exactLocation) {
-		this.exactLocation = exactLocation;
-	}
-	
+		
 	public Integer getExactBeginDate() {
 		return this.exactBeginDate;
-	}
-	
-	public void setExactBeginDate(Integer exactBeginDate) {
-		this.exactBeginDate = exactBeginDate;
 	}
 	
 	public String getName() {
@@ -61,12 +54,50 @@ public class PlanEvent implements Parcelable, Serializable{
 		return beginDate;
 	}
 	
-	public Date getEndDate() {
-		return endDate;
+	public Date getDuration() {
+		return duration;
 	}
 	
 	public GooglePlace getLocation() {
 		return location;
+	}
+	
+	public Date getEndDate() {
+		Date endDate = new Date();
+		endDate.setHours(beginDate.getHours() + duration.getHours() 
+				+ (duration.getMinutes() + beginDate.getMinutes()) / 60);
+		endDate.setMinutes((duration.getMinutes() + beginDate.getMinutes()) % 60);
+		return endDate;
+	}
+	
+	public int getDurationMinutes() {
+		return duration.getHours() * 60 + duration.getMinutes();
+	}
+	
+	public int getBeginDateMinutes() {
+		return beginDate.getHours() * 60 + beginDate.getMinutes();
+	}
+	
+	public int getEndDateMinutes() {
+		return beginDate.getHours() * 60 + beginDate.getMinutes()
+				+ duration.getHours() * 60 + duration.getMinutes();
+	}
+	
+	public void setExactLocation(Integer exactLocation) {
+		this.exactLocation = exactLocation;
+	}
+	
+	public void setLocation(GooglePlace location) {
+		this.location = location;
+	}
+	
+	public void setBeginDate(Date bDate) {
+		this.beginDate = bDate;
+	}
+	
+	
+	public void setExactBeginDate(Integer exactBeginDate) {
+		this.exactBeginDate = exactBeginDate;
 	}
 	
 	@Override
@@ -78,7 +109,7 @@ public class PlanEvent implements Parcelable, Serializable{
 	public void writeToParcel(Parcel dest, int flags) {
 		dest.writeString(name);
 		dest.writeString(DateFormater.formateDateToString(beginDate));
-		dest.writeString(DateFormater.formateDateToString(endDate));
+		dest.writeString(DateFormater.formateDateToString(duration));
 		dest.writeInt(exactLocation);
 		dest.writeInt(exactBeginDate);
 		dest.writeParcelable(location, flags);
@@ -109,8 +140,8 @@ public class PlanEvent implements Parcelable, Serializable{
 			ret += ", Begin date: " + beginDate;
 		}
 		
-		if (endDate != null) {
-			ret += ", End date: " + endDate;
+		if (duration != null) {
+			ret += ", End date: " + duration;
 		}
 		
 		if (location != null) {
@@ -118,5 +149,10 @@ public class PlanEvent implements Parcelable, Serializable{
 		}
 		
 		return ret;
+	}
+	
+	@Override
+	public int compareTo(Object another) {
+		return this.getBeginDateMinutes() - ((PlanEvent) another).getBeginDateMinutes();
 	}
 }

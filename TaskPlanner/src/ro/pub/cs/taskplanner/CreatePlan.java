@@ -70,9 +70,12 @@ public class CreatePlan extends SimpleBaseActivity
 
 		@Override
 		public void onClick(View v) {
-			System.out.println(events);
+			ScheduleAlgorithm schedule = new ScheduleAlgorithm(events);
+			events = schedule.schedulePlan();
+			Toast.makeText(getApplicationContext(), "Scheduling finished!",
+					Toast.LENGTH_SHORT).show();
+			populateView();
 		}
-		
 	}
 	
 	private class ButtonFinish implements Button.OnClickListener {
