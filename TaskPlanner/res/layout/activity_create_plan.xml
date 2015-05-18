@@ -6,20 +6,23 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
+    android:baselineAligned="false"
    	android:descendantFocusability="beforeDescendants"
 	android:focusableInTouchMode="true" >
     tools:context="ro.pub.cs.taskplanner.CreatePlan" >
+	    
+	S
 
     <Button
         android:id="@+id/newEvent"
         android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
+        android:layout_alignRight="@+id/planName"
         android:layout_below="@+id/planName"
-        android:layout_centerHorizontal="true"
         android:layout_marginTop="70dp"
-        android:text="Add new event" 
-        >
+        android:text="Add new event" >
+
     </Button>
 
     <ScrollView
@@ -28,7 +31,7 @@
         android:layout_height="300dp"
         android:layout_above="@+id/finishPlan"
         android:layout_alignLeft="@+id/newEvent"
-        android:layout_alignRight="@+id/finishPlan"
+        android:layout_alignRight="@+id/planName"
         android:layout_below="@+id/newEvent" >
 
         <LinearLayout
@@ -77,5 +80,30 @@
         android:layout_below="@+id/scrollView1"
         android:layout_toRightOf="@+id/scheduleButton"
         android:text="Notify!" />
+
+    <ScrollView
+        android:id="@+id/scrollView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/newEvent"
+        android:layout_alignLeft="@+id/newEvent"
+        android:layout_marginLeft="37dp" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical" >
+        </LinearLayout>
+    </ScrollView>
+
+    <Button
+        android:id="@+id/viewSchedule"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/scrollView1"
+        android:layout_alignRight="@+id/scrollView1"
+        android:layout_below="@+id/scheduleButton"
+        android:layout_marginTop="14dp"
+        android:text="View schedule!" />
 
 </RelativeLayout>

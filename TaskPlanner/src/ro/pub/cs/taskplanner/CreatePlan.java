@@ -26,27 +26,31 @@ import android.widget.Toast;
 public class CreatePlan extends SimpleBaseActivity
 	implements GoogleApiClient.OnConnectionFailedListener {
 
-	private static final long serialVersionUID = 1L;
-	Button finish;
-	Button createEvent;
-	Button scheduleButton;
-	Button notifyButton;
-	LinearLayout eventsLayout;
+	public List<PlanEvent> events;
+	public List<EventNotificationManager> notifications;
 	
 	protected GoogleApiClient mGoogleApiClient;
 
-	static final int EDIT_PLAN_EVENT = 0;
-	static final int NEW_PLAN_EVENT = 1;
+	private static final long serialVersionUID = 1L;
+	
+	private static final int EDIT_PLAN_EVENT = 0;
+	private static final int NEW_PLAN_EVENT = 1;
+	private static final int SCHEDULE_VIEW_EVENT = 1001;
+	private static final String INITIAL_NAME = "Write name here";
+	
+	private EditText nameText;
+	private Button finish;
+	private Button createEvent;
+	private Button scheduleButton;
+	private Button notifyButton;
+	private Button viewSchedule;
+	private LinearLayout eventsLayout;
+	
 	private int idCounter = 1;
 	private int mode = -1;
 	private int parentInt = -1;
 	private Plan parentPlan;
 	private Plan plan;
-	private EditText nameText;
-	private static final String INITIAL_NAME = "Write name here";
-	
-	public List<PlanEvent> events;
-	public List<EventNotificationManager> notifications;
 	
 	private class EditTextListener implements OnFocusChangeListener  {
 		@Override
@@ -78,6 +82,21 @@ public class CreatePlan extends SimpleBaseActivity
 		}
 	}
 	
+	private class ButtonViewSchedule implements Button.OnClickListener {
+		@Override
+		public void onClick(View v) {
+			Intent intent = new Intent("ro.pub.cs.taskplanner.ViewSchedule");
+			createPlanObject();
+			if (plan == null) {
+				System.out.println("plan still null");
+			}
+			System.out.println(plan.toString());
+			intent.putExtra("SCHEDULE_VIEW", (Parcelable)plan);
+			startActivityForResult(intent, SCHEDULE_VIEW_EVENT);		
+		}
+	}
+
+	
 	private class ButtonFinish implements Button.OnClickListener {
 		@Override
 		public void onClick(View v) {
@@ -108,8 +127,7 @@ public class CreatePlan extends SimpleBaseActivity
 		public void onClick(View v) {
 			Intent intent = new Intent("ro.pub.cs.taskplanner.CreateEvent");
 			intent.putExtra("MODE", 0);
-			startActivityForResult(intent, NEW_PLAN_EVENT);
-			
+			startActivityForResult(intent, NEW_PLAN_EVENT);		
 		}
 	}
 	
@@ -174,6 +192,7 @@ public class CreatePlan extends SimpleBaseActivity
 		scheduleButton = (Button) findViewById(R.id.scheduleButton);
 		notifyButton = (Button) findViewById(R.id.notificationButton);
 		eventsLayout = (LinearLayout) findViewById(R.id.eventsLayout);
+		viewSchedule = (Button) findViewById(R.id.viewSchedule);
 		
 		events = new ArrayList<PlanEvent>();
 		nameText = (EditText) findViewById(R.id.planName);
@@ -184,7 +203,8 @@ public class CreatePlan extends SimpleBaseActivity
 		finish.setOnClickListener(new ButtonFinish());
 		scheduleButton.setOnClickListener(new ButtonSchedule());
 		notifyButton.setOnClickListener(new ButtonNotify());
-	
+		viewSchedule.setOnClickListener(new ButtonViewSchedule());
+		
 		Intent intent = getIntent();
 		if (intent != null) {
 			mode = intent.getIntExtra("MODE", -1);

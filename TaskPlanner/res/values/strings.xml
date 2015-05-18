@@ -7,5 +7,7 @@
     <string name="title_activity_create_plan">CreatePlan</string>
     <string name="title_activity_create_event">CreateEvent</string>
     <string name="title_activity_connect_google">TaskPlanner</string>
+    <string name="title_activity_detailed_schedule_view">DetailedScheduleView</string>
+    <string name="title_activity_view_schedule">ViewSchedule</string>
 
 </resources>
