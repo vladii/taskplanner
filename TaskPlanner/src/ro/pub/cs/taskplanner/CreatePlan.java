@@ -10,7 +10,10 @@ import com.google.android.gms.location.places.Places;
 import ro.pub.cs.taskplanner.*;
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
@@ -134,10 +137,12 @@ public class CreatePlan extends SimpleBaseActivity
 	private class ButtonNotify implements Button.OnClickListener {
 		@Override
 		public void onClick(View v) {
-			/* Start notifications for all events. */
-			/* TODO */
+			/* Do a start notification. */
+			EventNotificationManager notificationManagerStart =
+					new EventNotificationManager(getApplicationContext(), null, null);
+			notificationManagerStart.schedule();
 			
-			/* Code just for test. Start a notification after 10 sec. */
+			/* Start notifications for all events. */
 			PlanEvent prevEvent = null;
 			for (PlanEvent event : events) {
 				EventNotificationManager notificationManager =
@@ -270,11 +275,34 @@ public class CreatePlan extends SimpleBaseActivity
 	    }
 	}
 	
+	public Drawable scaleImage (Drawable image, float scaleFactor) {
+
+	    if ((image == null) || !(image instanceof BitmapDrawable)) {
+	        return image;
+	    }
+
+	    Bitmap b = ((BitmapDrawable)image).getBitmap();
+
+	    int sizeX = Math.round(image.getIntrinsicWidth() * scaleFactor);
+	    int sizeY = Math.round(image.getIntrinsicHeight() * scaleFactor);
+
+	    Bitmap bitmapResized = Bitmap.createScaledBitmap(b, sizeX, sizeY, false);
+
+	    image = new BitmapDrawable(getResources(), bitmapResized);
+
+	    return image;
+
+	}
+	
 	void addView(PlanEvent planEvent) {
     	LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
     	            LinearLayout.LayoutParams.MATCH_PARENT,
     	            LinearLayout.LayoutParams.WRAP_CONTENT);
     	Button button = new Button(this);
+    	
+    	Drawable icon = getBaseContext().getResources().getDrawable( R.drawable.bullet);
+    	button.setCompoundDrawablesWithIntrinsicBounds(this.scaleImage(icon, (float) 0.1), null, null, null );
+    	
     	button.setText(planEvent.getName());
     	button.setId(idCounter ++);
     	eventsLayout.addView(button , params);

@@ -37,6 +37,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.IntentSender.SendIntentException;
+import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
@@ -176,11 +180,34 @@ public class MainActivity extends Activity {
 	    }
 	}
 	
+	public Drawable scaleImage (Drawable image, float scaleFactor) {
+
+	    if ((image == null) || !(image instanceof BitmapDrawable)) {
+	        return image;
+	    }
+
+	    Bitmap b = ((BitmapDrawable)image).getBitmap();
+
+	    int sizeX = Math.round(image.getIntrinsicWidth() * scaleFactor);
+	    int sizeY = Math.round(image.getIntrinsicHeight() * scaleFactor);
+
+	    Bitmap bitmapResized = Bitmap.createScaledBitmap(b, sizeX, sizeY, false);
+
+	    image = new BitmapDrawable(getResources(), bitmapResized);
+
+	    return image;
+
+	}
+	
 	private void addView(Plan plan) {
     	LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
     	            LinearLayout.LayoutParams.MATCH_PARENT,
     	            LinearLayout.LayoutParams.WRAP_CONTENT);
     	Button button = new Button(this);
+    	
+    	Drawable icon = getBaseContext().getResources().getDrawable( R.drawable.bullet);
+    	button.setCompoundDrawablesWithIntrinsicBounds(this.scaleImage(icon, (float) 0.1), null, null, null );
+    	
     	button.setText(plan.getName());
     	button.setId(idCounter ++);
     	plansLayout.addView(button , params);

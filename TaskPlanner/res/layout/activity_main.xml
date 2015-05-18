@@ -6,7 +6,8 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="ro.pub.cs.taskplanner.MainActivity" >
+    tools:context="ro.pub.cs.taskplanner.MainActivity"
+    android:theme="@android:style/Theme.Material.Light" >
 
     <EditText
         android:id="@+id/activities_label"

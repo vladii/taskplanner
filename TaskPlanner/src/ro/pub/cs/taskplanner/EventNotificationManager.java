@@ -1,6 +1,7 @@
 package ro.pub.cs.taskplanner;
 
 import java.util.Calendar;
+import java.util.Date;
 
 import android.content.Context;
 import android.content.Intent;
@@ -49,14 +50,36 @@ public class EventNotificationManager {
     		scheduleClient.doUnbindService();
 	}
 	
-	/* Function which decides when to wake the notification. */
+	/* Function which decides when to wake up the notification. */
 	private Calendar getWhen() {
-		/* TODO */
-		/* Currently, just add 10 seconds. */
-		Calendar calendar = Calendar.getInstance();
+		if (event == null) {
+			Calendar calendarNow = Calendar.getInstance();
+			calendarNow.add(Calendar.SECOND, 7);
+			
+			return calendarNow;
+		}
 		
-		calendar.add(Calendar.SECOND, 10);
+		Calendar calendarToday = Calendar.getInstance();
+		Calendar calendarEvent = Calendar.getInstance();
 		
-		return calendar;
+		calendarEvent.set(Calendar.HOUR_OF_DAY, event.getBeginDate().getHours());
+		calendarEvent.set(Calendar.MINUTE, event.getBeginDate().getMinutes());
+		calendarEvent.set(Calendar.SECOND, event.getBeginDate().getSeconds());
+		
+		// Subtract 30 minutes.
+		long timeEvent = calendarEvent.getTimeInMillis() - 30 * 60 * 1000;
+		calendarEvent.setTimeInMillis(timeEvent);
+		
+		System.out.println("Today: " + calendarToday);
+		System.out.println("Event: " + calendarEvent);
+		
+		if (calendarEvent.before(calendarToday)) {
+			calendarEvent = calendarToday;
+		}
+		
+		// Add 10 seconds for safety.
+		calendarEvent.add(Calendar.SECOND, 10);
+		
+		return calendarEvent;
 	}
 }

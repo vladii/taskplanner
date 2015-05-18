@@ -11,7 +11,8 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="ro.pub.cs.taskplanner.CreateEvent" >
+    tools:context="ro.pub.cs.taskplanner.CreateEvent"
+    android:theme="@android:style/Theme.Material.Light" >
 
     <EditText
         android:id="@+id/eventName"

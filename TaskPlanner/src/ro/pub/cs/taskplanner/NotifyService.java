@@ -1,5 +1,8 @@
 package ro.pub.cs.taskplanner;
 
+import java.util.Calendar;
+import java.util.Date;
+
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -78,16 +81,26 @@ public class NotifyService extends Service {
 		inboxStyle.setBigContentTitle("Details");
 		
 		// Add information about locations.
-		if (prevEvent != null) {
+		if (prevEvent != null && prevEvent.getLocation() != null) {
 			inboxStyle.addLine("Current location: " + prevEvent.getLocation().getAddress());
 		}
 		
-		if (event != null) {
+		if (event != null && event.getLocation() != null) {
 			inboxStyle.addLine("Next location: " + event.getLocation().getAddress());
 		}
 		
-		// Compute time.
-		inboxStyle.addLine("Time until you should leave: " + 0);
+		if (event != null && event.getBeginDate() != null) {
+			// Compute time.
+			long tm = event.getBeginDate().getTime() - Calendar.getInstance().getTimeInMillis();
+			Date xtm = new Date(tm);
+			inboxStyle.addLine("Time until next event: " + xtm.getMinutes() + ":" + xtm.getMinutes());
+			
+		} else {
+			// Initial event.
+			mBuilder = mBuilder.setContentText("You will receive reminders before start times of your events!");
+			inboxStyle.addLine("You will receive reminders before start times of your events!");
+		}
+		
 		
 		// Set style.
 		mBuilder.setStyle(inboxStyle);
@@ -97,8 +110,6 @@ public class NotifyService extends Service {
 		// mId allows you to update the notification later on.
 		int __id = (int) System.currentTimeMillis();
 		mNotificationManager.notify(__id, mBuilder.build());
-		
-		System.out.println("DAAAAAAAAA");
 		
 		// Stop the service when we are finished
 		stopSelf();
