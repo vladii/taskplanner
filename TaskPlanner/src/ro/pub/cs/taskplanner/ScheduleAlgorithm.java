@@ -19,9 +19,12 @@ public class ScheduleAlgorithm {
 	private GoogleDistanceMatrix googleDistanceMatrix;
 	private Map<Pair<GooglePlace, GooglePlace>, GoogleDistance> distances =
 			new HashMap<Pair<GooglePlace, GooglePlace>, GoogleDistance>();
+	
+	int debug = 0;
 
 	/* 30 minutes */
 	private static final int MINIMAL_TIME_BETWEEN_MINS = 30; 
+	private static final int SAFE_ERROR_MINS = 5;
 	
 	public ScheduleAlgorithm(List<PlanEvent> events) {
 		this.allEvents = events;
@@ -29,7 +32,11 @@ public class ScheduleAlgorithm {
 	
 	public List<PlanEvent> schedulePlan() {
 		fillLists();
+		
 		Collections.sort(completeEvents);
+		Collections.sort(noPlaceEvents);
+		
+		setCurrentLocationFirstEvent();
 		
 		mergeCompleteAndNoPlaceEvents();
 		
@@ -37,9 +44,7 @@ public class ScheduleAlgorithm {
 		computeDistances(completeEvents, noTimeEvents);
 		computeDistances(noTimeEvents, completeEvents);
 		computeDistances(noTimeEvents, noTimeEvents);
-		for (Pair<GooglePlace, GooglePlace> p : distances.keySet()) {
-			Pair test = new Pair(p.first, p.second);
-		}
+		
 		mergeCompleteAndNoTimeEvents();
 		
 		mergeCompleteAndFreeEvents();
@@ -71,7 +76,7 @@ public class ScheduleAlgorithm {
 			
 			int pos2 = pos + 1;
 			if ( pos2 == completeEvents.size()) {
-				pos2 = -1;
+				pos2 = pos;
 			}
 			List<GooglePlace> nearLocations = computeNearLocations(event, pos, pos2);
 			List<GooglePlace> origins = new ArrayList<GooglePlace>();
@@ -90,13 +95,14 @@ public class ScheduleAlgorithm {
 			if (origins.size() > 1) {
 				dist += (distanceMatrix.get(1).get(nearPos).durationValue / 60);
 				if (dist + completeEvents.get(pos).getEndDateMinutes() + event.getDurationMinutes()
-						< completeEvents.get(pos + 1).getBeginDateMinutes()) {
+						+ SAFE_ERROR_MINS < completeEvents.get(pos + 1).getBeginDateMinutes()) {
 					constraints = true;
 				}
 			} else {
 				constraints = true;
 			}
 			if (constraints) {
+				dist1 += SAFE_ERROR_MINS;
 				event.setLocation(nearLocations.get(nearPos));
 				Date date = new Date();
 				Date date1 = completeEvents.get(pos).getEndDate();
@@ -121,7 +127,7 @@ public class ScheduleAlgorithm {
 		googleDistanceMatrix = new GoogleDistanceMatrix(origins, nearLocations);
 		List<List<GoogleDistance> > distanceMatrix = googleDistanceMatrix.getDistanceMatrix();
 		int nearPos = getNearestPosition(origins, nearLocations, distanceMatrix);
-		int dist = (int) (distanceMatrix.get(0).get(nearPos).durationValue / 60);
+		int dist = (int) (distanceMatrix.get(0).get(nearPos).durationValue / 60) + SAFE_ERROR_MINS;
 				
 		event.setLocation(nearLocations.get(nearPos));
 		event.setExactLocation(1);
@@ -160,7 +166,7 @@ public class ScheduleAlgorithm {
 				int endTime = completeEvents.get(j).getEndDateMinutes() + (int) (dist / 60) 
 						+ event.getDurationMinutes();
 				if (j < completeEvents.size() - 1 
-						&& endTime <= completeEvents.get(j + 1).getBeginDateMinutes()) {
+						&& endTime + SAFE_ERROR_MINS < completeEvents.get(j + 1).getBeginDateMinutes()) {
 					constraints = true;
 				}
 				if (j == completeEvents.size() - 1) {
@@ -177,8 +183,8 @@ public class ScheduleAlgorithm {
 				Date date = new Date();
 				int dist = (int) (distances.get(
 						new Pair(completeEvents.get(pos).getLocation(), 
-								event.getLocation())).durationValue / 60);
-				date.setHours(dist / 60 + prevEventDate.getHours() 
+								event.getLocation())).durationValue / 60) + SAFE_ERROR_MINS;
+				date.setHours(dist / 60 + prevEventDate.getHours()
 						+ (dist % 60 + prevEventDate.getMinutes()) / 60);
 				date.setMinutes((prevEventDate.getMinutes() + dist) % 60);
 				event.setBeginDate(date);
@@ -189,7 +195,6 @@ public class ScheduleAlgorithm {
 	}
 		
 	private void mergeCompleteAndNoPlaceEvents() {
-		Collections.sort(noPlaceEvents);
 		
 		for (PlanEvent event : noPlaceEvents) {
 			int pos;
@@ -248,11 +253,13 @@ public class ScheduleAlgorithm {
 		GooglePlace place1 = null, place2 = null;
 		if (pos1 != -1) {
 			place1 = completeEvents.get(pos1).getLocation();
+			
+			
 			googleNearbyLocations = new GoogleNearbyLocations(event.getLocation().getName(),
 					place1.getCoords().latitude, place1.getCoords().longitude);
 			
 			nearLocations.addAll(googleNearbyLocations.getNearbyLocations());
-			
+						
 			for (; nearLocations.size() > 3;) {
 				nearLocations.remove(nearLocations.size() - 1);
 			}
@@ -263,6 +270,7 @@ public class ScheduleAlgorithm {
 			googleNearbyLocations = new GoogleNearbyLocations(event.getLocation().getName(),
 					place2.getCoords().latitude, place2.getCoords().longitude);
 			nearLocations.addAll(googleNearbyLocations.getNearbyLocations());
+			
 			for (; 5 < nearLocations.size(); ) {
 				nearLocations.remove(nearLocations.size() - 1);
 			}
@@ -275,6 +283,7 @@ public class ScheduleAlgorithm {
 		if (origins.size() == 0 || destinations.size() == 0) {
 			return;
 		}
+		System.out.println("origins : " + getGooglePlaces(origins) + "dest : " + getGooglePlaces(destinations));
 		googleDistanceMatrix = new GoogleDistanceMatrix(
 				getGooglePlaces(origins), getGooglePlaces(destinations));
 		List<List<GoogleDistance>> distanceMatrix = googleDistanceMatrix.getDistanceMatrix();
@@ -312,5 +321,73 @@ public class ScheduleAlgorithm {
 		}
 		
 		return places;
+	}
+
+	private void setCurrentLocationFirstEvent() {
+		PlanEvent event = null;
+		for (int i = 0; i < noTimeEvents.size(); i++) {
+			if ("Current location".equals(noTimeEvents.get(i).getName())) {
+				event = noTimeEvents.get(i);
+				noTimeEvents.remove(i);
+				break;
+			}
+		}
+		if (event == null) {
+			return;
+		}
+		addCurrentLocationToComplete(event);
+	}
+	
+	void addCurrentLocationToComplete(PlanEvent event) {
+		PlanEvent minEvent;
+		int isComplete = 1;
+		if (completeEvents.size () > 0) {
+			minEvent = completeEvents.get(0);
+		} else if (noPlaceEvents.size() > 0) {
+			minEvent = noPlaceEvents.get(0);
+			isComplete = 0;
+		} else {
+			// No time set for any event
+			event.getBeginDate().setHours(9);
+			event.getBeginDate().setMinutes(0);
+			event.setExactBeginDate(1);
+			completeEvents.add(event);
+			return;
+		}
+		if (completeEvents.size() > 0 && noPlaceEvents.size() > 0) {
+			if (minEvent.getBeginDateMinutes() > noPlaceEvents.get(0).getBeginDateMinutes()) {
+				minEvent = noPlaceEvents.get(0);
+				isComplete = 0;
+			}
+		}
+		completeEvents.add(0, event);
+		
+		List<GooglePlace> origins = new ArrayList<GooglePlace>();
+		List<GooglePlace> dest = new ArrayList<GooglePlace>();
+		origins.add(event.getLocation());
+		debug = 1;
+		if (isComplete == 1) {
+			dest.add(minEvent.getLocation());
+		} else {
+			dest.addAll(computeNearLocations(minEvent, 0, -1));
+		}
+		googleDistanceMatrix = new GoogleDistanceMatrix(origins, dest);
+		List<List<GoogleDistance> > distanceMatrix = googleDistanceMatrix.getDistanceMatrix();
+		
+		int pos = getNearestPosition(origins, dest, distanceMatrix);
+		if (isComplete == 0) {
+			noPlaceEvents.get(0).setLocation(dest.get(pos));
+			noPlaceEvents.get(0).setExactLocation(1);
+			completeEvents.add(1, noPlaceEvents.get(0));
+			noPlaceEvents.remove(0);
+		}
+
+		int dist = (int) distanceMatrix.get(0).get(pos).durationValue / 60;
+		int mins = completeEvents.get(1).getBeginDateMinutes();
+		mins = mins - dist - event.getDurationMinutes() - SAFE_ERROR_MINS;
+		event.getBeginDate().setMinutes(mins % 60);
+		event.getBeginDate().setHours(mins / 60);
+		event.setExactBeginDate(1);
+		System.out.println("debug : " + completeEvents + "\n" + noPlaceEvents + "\n");
 	}
 }
